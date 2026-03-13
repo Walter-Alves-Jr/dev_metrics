@@ -1,18 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addDeveloper } from "@/lib/storage";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { addDeveloper, Product } from "@/lib/storage";
 import { useState } from "react";
 
 interface AddDeveloperFormProps {
+  products: Product[];
   onDeveloperAdded: () => void;
 }
 
 export default function AddDeveloperForm({
+  products,
   onDeveloperAdded,
 }: AddDeveloperFormProps) {
   const [name, setName] = useState("");
   const [monthlyCost, setMonthlyCost] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -31,13 +41,22 @@ export default function AddDeveloperForm({
     }
 
     try {
-      addDeveloper(name, cost);
+      addDeveloper(name, cost, selectedProducts);
       setName("");
       setMonthlyCost("");
+      setSelectedProducts([]);
       onDeveloperAdded();
     } catch (err) {
       setError("Erro ao adicionar desenvolvedor");
     }
+  };
+
+  const toggleProduct = (productId: string) => {
+    setSelectedProducts((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
   };
 
   return (
@@ -66,6 +85,27 @@ export default function AddDeveloperForm({
           onChange={(e) => setMonthlyCost(e.target.value)}
           placeholder="Ex: 5000"
         />
+      </div>
+
+      <div>
+        <Label>Produtos (selecione um ou mais)</Label>
+        {products.length === 0 ? (
+          <p className="text-sm text-gray-500">Nenhum produto cadastrado</p>
+        ) : (
+          <div className="space-y-2 mt-2">
+            {products.map((product) => (
+              <label key={product.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedProducts.includes(product.id)}
+                  onChange={() => toggleProduct(product.id)}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm">{product.name}</span>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
       <Button type="submit" className="w-full">

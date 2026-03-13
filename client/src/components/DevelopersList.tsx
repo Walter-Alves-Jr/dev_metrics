@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { deleteDeveloper, updateDeveloper } from "@/lib/storage";
-import { Developer } from "@/lib/storage";
+import {
+  deleteDeveloper,
+  Developer,
+  getProducts,
+  updateDeveloper,
+} from "@/lib/storage";
 import { useState } from "react";
 
 interface DevelopersListProps {
@@ -14,20 +18,30 @@ export default function DevelopersList({
   developers,
   onDeveloperUpdated,
 }: DevelopersListProps) {
+  const products = getProducts();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editCost, setEditCost] = useState("");
+  const [editProducts, setEditProducts] = useState<string[]>([]);
+
+  const getProductNames = (productIds: string[]) => {
+    return productIds
+      .map((id) => products.find((p) => p.id === id)?.name)
+      .filter(Boolean)
+      .join(", ");
+  };
 
   const handleEdit = (dev: Developer) => {
     setEditingId(dev.id);
     setEditName(dev.name);
     setEditCost(dev.monthlyCost.toString());
+    setEditProducts(dev.productIds);
   };
 
   const handleSave = (id: string) => {
     const cost = parseFloat(editCost);
     if (editName.trim() && !isNaN(cost) && cost >= 0) {
-      updateDeveloper(id, editName, cost);
+      updateDeveloper(id, editName, cost, editProducts);
       setEditingId(null);
       onDeveloperUpdated();
     }
@@ -38,6 +52,14 @@ export default function DevelopersList({
       deleteDeveloper(id);
       onDeveloperUpdated();
     }
+  };
+
+  const toggleProduct = (productId: string) => {
+    setEditProducts((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
   };
 
   if (developers.length === 0) {
@@ -70,6 +92,22 @@ export default function DevelopersList({
                   onChange={(e) => setEditCost(e.target.value)}
                 />
               </div>
+              <div>
+                <Label>Produtos</Label>
+                <div className="space-y-2 mt-2">
+                  {products.map((product) => (
+                    <label key={product.id} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={editProducts.includes(product.id)}
+                        onChange={() => toggleProduct(product.id)}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">{product.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
               <div className="flex gap-2">
                 <Button
                   size="sm"
@@ -90,11 +128,16 @@ export default function DevelopersList({
             </div>
           ) : (
             <div className="flex justify-between items-start">
-              <div>
+              <div className="flex-1">
                 <h4 className="font-semibold">{dev.name}</h4>
                 <p className="text-sm text-gray-600">
                   Custo: R$ {dev.monthlyCost.toFixed(2)}
                 </p>
+                {dev.productIds.length > 0 && (
+                  <p className="text-sm text-blue-600">
+                    Produtos: {getProductNames(dev.productIds)}
+                  </p>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button
