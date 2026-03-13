@@ -24,7 +24,8 @@ export default function DevelopersList({
   const [editCost, setEditCost] = useState("");
   const [editProducts, setEditProducts] = useState<string[]>([]);
 
-  const getProductNames = (productIds: string[]) => {
+  const getProductNames = (productIds: string[] | undefined) => {
+    if (!Array.isArray(productIds) || productIds.length === 0) return "";
     return productIds
       .map((id) => products.find((p) => p.id === id)?.name)
       .filter(Boolean)
@@ -35,7 +36,7 @@ export default function DevelopersList({
     setEditingId(dev.id);
     setEditName(dev.name);
     setEditCost(dev.monthlyCost.toString());
-    setEditProducts(dev.productIds);
+    setEditProducts(Array.isArray(dev.productIds) ? dev.productIds : []);
   };
 
   const handleSave = (id: string) => {
@@ -133,7 +134,7 @@ export default function DevelopersList({
                 <p className="text-sm text-gray-600">
                   Custo: R$ {dev.monthlyCost.toFixed(2)}
                 </p>
-                {dev.productIds.length > 0 && (
+                {Array.isArray(dev.productIds) && dev.productIds.length > 0 && (
                   <p className="text-sm text-blue-600">
                     Produtos: {getProductNames(dev.productIds)}
                   </p>

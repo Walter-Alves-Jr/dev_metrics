@@ -41,8 +41,13 @@ const TASKS_KEY = "dev_metrics_tasks";
 
 // ===== PRODUCTS =====
 export function getProducts(): Product[] {
-  const data = localStorage.getItem(PRODUCTS_KEY);
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = localStorage.getItem(PRODUCTS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error("Error reading products from storage:", error);
+    return [];
+  }
 }
 
 export function addProduct(name: string, description?: string): Product {
@@ -92,8 +97,19 @@ export function deleteProduct(id: string): boolean {
 
 // ===== DEVELOPERS =====
 export function getDevelopers(): Developer[] {
-  const data = localStorage.getItem(DEVELOPERS_KEY);
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = localStorage.getItem(DEVELOPERS_KEY);
+    if (!data) return [];
+    const developers = JSON.parse(data);
+    // Normalize productIds to ensure it's always an array
+    return developers.map((d: any) => ({
+      ...d,
+      productIds: Array.isArray(d.productIds) ? d.productIds : [],
+    }));
+  } catch (error) {
+    console.error("Error reading developers from storage:", error);
+    return [];
+  }
 }
 
 export function addDeveloper(
@@ -147,8 +163,13 @@ export function deleteDeveloper(id: string): boolean {
 
 // ===== TASKS =====
 export function getTasks(): Task[] {
-  const data = localStorage.getItem(TASKS_KEY);
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = localStorage.getItem(TASKS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error("Error reading tasks from storage:", error);
+    return [];
+  }
 }
 
 export function addTask(
