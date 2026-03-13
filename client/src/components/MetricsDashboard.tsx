@@ -133,6 +133,25 @@ export default function MetricsDashboard() {
                       {metric.roi.toFixed(2)}%
                     </p>
                   </div>
+                  {metric.maintenanceCount > 0 && (
+                    <>
+                      <div className="col-span-2 md:col-span-3 border-t pt-3 mt-3">
+                        <p className="font-semibold text-sm text-gray-700 mb-2">Metricas de Sustentacao</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Custo/h Sustentacao</p>
+                        <p className="font-semibold">R$ {metric.maintenanceCostPerHour.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Tempo Medio/Ticket</p>
+                        <p className="font-semibold">{metric.maintenanceAvgTime}h</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Tickets Resolvidos</p>
+                        <p className="font-semibold">{metric.maintenanceTicketsResolved}</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             ))
@@ -178,19 +197,27 @@ export default function MetricsDashboard() {
                       R$ {metric.avgValuePerTask.toFixed(2)}
                     </p>
                   </div>
-                  <div className="col-span-2 md:col-span-1">
-                    <p className="text-gray-600">ROI</p>
+                  <div>
+                    <p className="text-gray-600">ROI Projetos</p>
                     <p
                       className={`text-lg font-bold ${
-                        metric.roi >= 100
+                        metric.projectROI >= 100
                           ? "text-green-600"
-                          : metric.roi >= 50
+                          : metric.projectROI >= 50
                             ? "text-yellow-600"
                             : "text-red-600"
                       }`}
                     >
-                      {metric.roi.toFixed(2)}%
+                      {metric.projectROI.toFixed(2)}%
                     </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Custo/h Sustentacao</p>
+                    <p className="font-semibold">R$ {metric.maintenanceCostPerHour.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Tempo Medio Sustentacao</p>
+                    <p className="font-semibold">{metric.maintenanceAvgTime}h</p>
                   </div>
                 </div>
               </div>

@@ -200,6 +200,15 @@ export function addTask(
   };
   tasks.push(newTask);
   localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  
+  // Auto-allocate developer to product if not already allocated
+  const developers = getDevelopers();
+  const devIndex = developers.findIndex((d) => d.id === developerId);
+  if (devIndex !== -1 && !developers[devIndex].productIds.includes(productId)) {
+    developers[devIndex].productIds.push(productId);
+    localStorage.setItem(DEVELOPERS_KEY, JSON.stringify(developers));
+  }
+  
   return newTask;
 }
 
@@ -263,11 +272,20 @@ export function getMetricas() {
     const devProjects = devTasks.filter((t) => t.type === "projeto");
     const devMaintenance = devTasks.filter((t) => t.type === "sustentacao");
 
+    // Project metrics
+    const projectValue = devProjects.reduce((sum, t) => sum + t.value, 0);
+    
+    // Maintenance metrics
+    const maintenanceHorasReais = devMaintenance.reduce((sum, t) => sum + t.horasReais, 0);
+    const maintenanceCostPerHour = maintenanceHorasReais > 0 ? (dev.monthlyCost / maintenanceHorasReais).toFixed(2) : "0";
+    const maintenanceAvgTime = devMaintenance.length > 0 ? (maintenanceHorasReais / devMaintenance.length).toFixed(2) : "0";
+    const maintenanceTicketsResolved = devMaintenance.filter((t) => t.status === "concluido").length;
+
     const totalValue = devTasks.reduce((sum, t) => sum + t.value, 0);
     const totalHorasOrcadas = devTasks.reduce((sum, t) => sum + t.horasOrcadas, 0);
     const totalHorasReais = devTasks.reduce((sum, t) => sum + t.horasReais, 0);
     const taskCount = devTasks.length;
-    const roi = dev.monthlyCost > 0 ? (totalValue / dev.monthlyCost) * 100 : 0;
+    const roi = dev.monthlyCost > 0 ? (projectValue / dev.monthlyCost) * 100 : 0;
     const produtividade =
       totalHorasReais > 0 ? (totalValue / totalHorasReais).toFixed(2) : "0";
     const eficiencia =
@@ -289,6 +307,9 @@ export function getMetricas() {
       roi: parseFloat(roi.toFixed(2)),
       produtividade: parseFloat(produtividade as string),
       eficiencia: parseFloat(eficiencia as string),
+      maintenanceCostPerHour: parseFloat(maintenanceCostPerHour as string),
+      maintenanceAvgTime: parseFloat(maintenanceAvgTime as string),
+      maintenanceTicketsResolved,
       avgValuePerTask:
         taskCount > 0 ? parseFloat((totalValue / taskCount).toFixed(2)) : 0,
     };
@@ -304,30 +325,51 @@ export function getMetricasPorProduto() {
 
   return products.map((product) => {
     const productTasks = tasks.filter((t) => t.productId === product.id);
+    const projectTasks = productTasks.filter((t) => t.type === "projeto");
+    const maintenanceTasks = productTasks.filter((t) => t.type === "sustentacao");
     const productDevs = developers.filter((d) =>
       d.productIds.includes(product.id)
     );
 
-    const totalValue = productTasks.reduce((sum, t) => sum + t.value, 0);
-    const totalHorasOrcadas = productTasks.reduce(
+    // Projeto metrics
+    const projectValue = projectTasks.reduce((sum, t) => sum + t.value, 0);
+    const projectHorasOrcadas = projectTasks.reduce(
       (sum, t) => sum + t.horasOrcadas,
       0
     );
-    const totalHorasReais = productTasks.reduce((sum, t) => sum + t.horasReais, 0);
+    const projectHorasReais = projectTasks.reduce((sum, t) => sum + t.horasReais, 0);
+
+    // Sustentacao metrics
+    const maintenanceHorasReais = maintenanceTasks.reduce((sum, t) => sum + t.horasReais, 0);
+    const maintenanceCount = maintenanceTasks.length;
+    const maintenanceAvgTime = maintenanceCount > 0 ? (maintenanceHorasReais / maintenanceCount).toFixed(2) : "0";
+
+    const totalValue = projectValue + maintenanceTasks.reduce((sum, t) => sum + t.value, 0);
+    const totalHorasOrcadas = projectHorasOrcadas + maintenanceTasks.reduce((sum, t) => sum + t.horasOrcadas, 0);
+    const totalHorasReais = projectHorasReais + maintenanceHorasReais;
     const totalCost = productDevs.reduce((sum, d) => sum + d.monthlyCost, 0);
     const taskCount = productTasks.length;
-    const roi = totalCost > 0 ? (totalValue / totalCost) * 100 : 0;
+
+    // ROI only for projects
+    const projectROI = totalCost > 0 ? (projectValue / totalCost) * 100 : 0;
+    
+    // Maintenance cost per hour
+    const maintenanceCostPerHour = maintenanceHorasReais > 0 ? (totalCost / maintenanceHorasReais).toFixed(2) : "0";
 
     return {
       productId: product.id,
       productName: product.name,
       devCount: productDevs.length,
       taskCount,
+      projectCount: projectTasks.length,
+      maintenanceCount,
       totalValue,
       totalHorasOrcadas,
       totalHorasReais,
       totalCost,
-      roi: parseFloat(roi.toFixed(2)),
+      projectROI: parseFloat(projectROI.toFixed(2)),
+      maintenanceCostPerHour: parseFloat(maintenanceCostPerHour as string),
+      maintenanceAvgTime: parseFloat(maintenanceAvgTime as string),
       avgValuePerTask:
         taskCount > 0 ? parseFloat((totalValue / taskCount).toFixed(2)) : 0,
     };
