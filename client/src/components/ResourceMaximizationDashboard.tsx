@@ -1,5 +1,5 @@
-import { Developer } from "@/lib/storage";
-import { calculateResourceMaximization, getSettings, updateSettings } from "@/lib/bugTracking";
+import { Developer, getMetricas } from "@/lib/storage";
+import { getSettings, updateSettings, getBugTracking } from "@/lib/bugTracking";
 import { useState } from "react";
 import {
   Select,
@@ -41,30 +41,30 @@ export default function ResourceMaximizationDashboard({
     }
   };
 
-  const maximization = calculateResourceMaximization(
-    selectedDev.id,
-    selectedDev.name,
-    selectedDev.monthlyCost,
-    settings.hourlyRate
-  );
+  // Buscar métricas do dev
+  const metricas = getMetricas();
+  const devMetricas = metricas.find((m) => m.developerId === selectedDevId);
+  
+  // Buscar projetos/bugs do dev
+  const bugTracking = getBugTracking();
+  const devItems = bugTracking.filter((item) => item.developerId === selectedDevId);
 
-  // Filtrar cenários relevantes (1, 5, 10, 15, 20, 25, 30 dias)
-  const relevantScenarios = maximization.scenarios.filter(
-    (s: any) => [1, 5, 10, 15, 20, 25, 30].includes(s.days)
-  );
+  // Calcular receita e custo baseado em dados reais
+  const costPerHour = selectedDev.monthlyCost / 160; // 160 horas por mês
+  
+  // Receita = valor da hora * horas orçadas
+  const totalHoursOrcadas = devItems.reduce((acc, item) => {
+    if (item.horasGastas) {
+      return acc + item.horasGastas;
+    }
+    return acc;
+  }, 0);
 
-  const getEfficiencyColor = (efficiency: number) => {
-    if (efficiency >= 150) return "bg-green-50 text-green-700";
-    if (efficiency >= 100) return "bg-blue-50 text-blue-700";
-    if (efficiency >= 50) return "bg-yellow-50 text-yellow-700";
-    return "bg-red-50 text-red-700";
-  };
-
-  const getRoiColor = (roi: number) => {
-    if (roi >= 50) return "bg-green-50 text-green-700";
-    if (roi >= 0) return "bg-blue-50 text-blue-700";
-    return "bg-red-50 text-red-700";
-  };
+  const totalRevenue = totalHoursOrcadas * (settings.hourlyRate / 100);
+  const totalCost = totalHoursOrcadas * costPerHour;
+  const totalProfit = totalRevenue - totalCost;
+  const totalROI = totalCost > 0 ? ((totalProfit / totalCost) * 100) : 0;
+  const efficiency = totalCost > 0 ? ((totalRevenue / totalCost) * 100) : 0;
 
   return (
     <div className="space-y-4">
@@ -85,10 +85,10 @@ export default function ResourceMaximizationDashboard({
       </div>
 
       <div className="p-4 bg-blue-50 rounded border border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-2">Cenário Base</h3>
+        <h3 className="font-semibold text-blue-900 mb-2">Configuração</h3>
         <div className="flex items-center gap-2 mb-2">
           <p className="text-sm text-blue-800">
-            <strong>100 horas</strong> por <strong>R$ {settings.hourlyRate.toFixed(2)}</strong> = <strong>R$ {(settings.hourlyRate / 100).toFixed(2)}/hora</strong>
+            <strong>Valor da hora:</strong> R$ {settings.hourlyRate.toFixed(2)}
           </p>
           {!editingRate ? (
             <button
@@ -121,62 +121,103 @@ export default function ResourceMaximizationDashboard({
           )}
         </div>
         <p className="text-sm text-blue-800">
-          Custo do dev: <strong>R$ {selectedDev.monthlyCost.toFixed(2)}/mês</strong> (~R$ {(selectedDev.monthlyCost / 22).toFixed(2)}/dia)
+          Custo do dev: <strong>R$ {selectedDev.monthlyCost.toFixed(2)}/mês</strong> (~R$ {costPerHour.toFixed(2)}/hora)
         </p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="bg-gray-100 border-b border-gray-300">
-              <th className="p-2 text-left font-semibold text-gray-700">Dias</th>
-              <th className="p-2 text-left font-semibold text-gray-700">Horas</th>
-              <th className="p-2 text-right font-semibold text-gray-700">Receita</th>
-              <th className="p-2 text-right font-semibold text-gray-700">Custo</th>
-              <th className="p-2 text-right font-semibold text-gray-700">Lucro</th>
-              <th className="p-2 text-center font-semibold text-gray-700">Eficiência</th>
-              <th className="p-2 text-center font-semibold text-gray-700">ROI</th>
-            </tr>
-          </thead>
-          <tbody>
-            {relevantScenarios.map((scenario: any) => {
-              const profit = scenario.totalRevenue - scenario.totalCost;
-              return (
-                <tr key={scenario.days} className="border-b border-gray-200 hover:bg-gray-50">
-                  <td className="p-2 font-semibold text-gray-900">{scenario.days}d</td>
-                  <td className="p-2 text-gray-700">{scenario.totalHours}h</td>
-                  <td className="p-2 text-right text-gray-700">
-                    R$ {scenario.totalRevenue.toFixed(2)}
-                  </td>
-                  <td className="p-2 text-right text-gray-700">
-                    R$ {scenario.totalCost.toFixed(2)}
-                  </td>
-                  <td className={`p-2 text-right font-semibold ${profit >= 0 ? "text-green-700" : "text-red-700"}`}>
-                    R$ {profit.toFixed(2)}
-                  </td>
-                  <td className="p-2 text-center">
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${getEfficiencyColor(scenario.efficiency)}`}>
-                      {scenario.efficiency.toFixed(0)}%
-                    </span>
-                  </td>
-                  <td className="p-2 text-center">
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${getRoiColor(scenario.roi)}`}>
-                      {scenario.roi.toFixed(0)}%
-                    </span>
-                  </td>
+      {devItems.length === 0 ? (
+        <div className="p-4 bg-yellow-50 rounded border border-yellow-200">
+          <p className="text-sm text-yellow-800">
+            <strong>Nenhum projeto/bug atrelado a este desenvolvedor.</strong> Registre projetos ou bugs na aba "Bugs/Projetos" para ver a análise de recursos.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="p-4 bg-green-50 rounded border border-green-200">
+            <h4 className="font-semibold text-green-900 mb-3">Resumo de Recursos</h4>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+              <div>
+                <p className="text-green-700">Total de Horas</p>
+                <p className="font-semibold text-green-900">{totalHoursOrcadas.toFixed(1)}h</p>
+              </div>
+              <div>
+                <p className="text-green-700">Receita Total</p>
+                <p className="font-semibold text-green-900">R$ {totalRevenue.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-green-700">Custo Total</p>
+                <p className="font-semibold text-green-900">R$ {totalCost.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-green-700">Lucro</p>
+                <p className={`font-semibold ${totalProfit >= 0 ? "text-green-700" : "text-red-700"}`}>
+                  R$ {totalProfit.toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <p className="text-green-700">ROI</p>
+                <p className={`font-semibold ${totalROI >= 0 ? "text-green-700" : "text-red-700"}`}>
+                  {totalROI.toFixed(0)}%
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-100 border-b border-gray-300">
+                  <th className="p-2 text-left font-semibold text-gray-700">Projeto/Bug</th>
+                  <th className="p-2 text-right font-semibold text-gray-700">Horas</th>
+                  <th className="p-2 text-right font-semibold text-gray-700">Receita</th>
+                  <th className="p-2 text-right font-semibold text-gray-700">Custo</th>
+                  <th className="p-2 text-right font-semibold text-gray-700">Lucro</th>
+                  <th className="p-2 text-center font-semibold text-gray-700">ROI</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {devItems.map((item) => {
+                  const hours = item.horasGastas || 0;
+                  const itemRevenue = hours * (settings.hourlyRate / 100);
+                  const itemCost = hours * costPerHour;
+                  const itemProfit = itemRevenue - itemCost;
+                  const itemROI = itemCost > 0 ? ((itemProfit / itemCost) * 100) : 0;
+
+                  return (
+                    <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50">
+                      <td className="p-2 text-gray-900">
+                        <span className="text-xs mr-1">{item.type === "bug" ? "🐛" : "📋"}</span>
+                        {item.title}
+                      </td>
+                      <td className="p-2 text-right text-gray-700">{hours}h</td>
+                      <td className="p-2 text-right text-gray-700">R$ {itemRevenue.toFixed(2)}</td>
+                      <td className="p-2 text-right text-gray-700">R$ {itemCost.toFixed(2)}</td>
+                      <td className={`p-2 text-right font-semibold ${itemProfit >= 0 ? "text-green-700" : "text-red-700"}`}>
+                        R$ {itemProfit.toFixed(2)}
+                      </td>
+                      <td className="p-2 text-center">
+                        <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                          itemROI >= 50 ? "bg-green-50 text-green-700" : itemROI >= 0 ? "bg-yellow-50 text-yellow-700" : "bg-red-50 text-red-700"
+                        }`}>
+                          {itemROI.toFixed(0)}%
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       <div className="p-4 bg-gray-50 rounded border border-gray-200">
-        <h4 className="font-semibold text-gray-900 mb-2">Legenda</h4>
+        <h4 className="font-semibold text-gray-900 mb-2">Como funciona</h4>
         <div className="space-y-1 text-sm text-gray-700">
-          <p><strong>Eficiência:</strong> Percentual de retorno sobre o custo (Receita / Custo × 100)</p>
-          <p><strong>ROI:</strong> Retorno sobre investimento ((Receita - Custo) / Custo × 100)</p>
-          <p><strong>Verde:</strong> Altamente lucrativo | <strong>Azul:</strong> Lucrativo | <strong>Amarelo:</strong> Moderado | <strong>Vermelho:</strong> Prejuízo</p>
+          <p><strong>Horas:</strong> Soma das horas orçadas/gastas em todos os projetos/bugs do dev</p>
+          <p><strong>Receita:</strong> Horas × Valor da hora configurado</p>
+          <p><strong>Custo:</strong> Horas × Custo/hora do dev (baseado no salário mensal)</p>
+          <p><strong>ROI:</strong> ((Receita - Custo) / Custo) × 100</p>
         </div>
       </div>
     </div>
