@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDevelopers, getProducts } from "@/lib/storage";
 import { getBugTracking } from "@/lib/bugTracking";
 import ExportReports from "@/components/ExportReports";
+import MonthlyMetricsDashboard from "@/components/MonthlyMetricsDashboard";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -44,13 +45,14 @@ export default function Home() {
         </header>
 
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-4" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}>
+          <TabsList className="grid w-full grid-cols-8 mb-4" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}>
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
             <TabsTrigger value="developers">Devs</TabsTrigger>
             <TabsTrigger value="tasks">Tarefas</TabsTrigger>
             <TabsTrigger value="bugs">Bugs/Projetos</TabsTrigger>
             <TabsTrigger value="recursos">Recursos</TabsTrigger>
+            <TabsTrigger value="mensal">Mensal</TabsTrigger>
             <TabsTrigger value="register">Registrar</TabsTrigger>
           </TabsList>
 
@@ -117,6 +119,14 @@ export default function Home() {
             <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
               <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>Maximização de Recursos</h2>
               <ResourceMaximizationDashboard developers={developers} />
+            </div>
+          </TabsContent>
+
+          {/* Métricas Mensais Tab */}
+          <TabsContent value="mensal" className="space-y-4">
+            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>Métricas Mensais</h2>
+              <MonthlyMetricsDashboard key={refreshKey} />
             </div>
           </TabsContent>
 
