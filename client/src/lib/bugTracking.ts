@@ -9,6 +9,7 @@ export type BugTrackingItem = {
   status: "planejado" | "em_progresso" | "hml" | "prd" | "concluido";
   developerId: string;
   productId: string;
+  horasGastas?: number; // Horas gastas para resolver (apenas para bugs)
   createdAt: string;
 };
 
@@ -30,6 +31,32 @@ export type ScenarioResult = {
 };
 
 const BUG_TRACKING_KEY = "dev_metrics_bug_tracking";
+const SETTINGS_KEY = "dev_metrics_settings";
+
+export type Settings = {
+  hourlyRate: number; // Valor da hora de desenvolvimento em reais
+};
+
+const DEFAULT_SETTINGS: Settings = {
+  hourlyRate: 250, // Padrão: R$250/hora
+};
+
+export function getSettings(): Settings {
+  try {
+    const data = localStorage.getItem(SETTINGS_KEY);
+    return data ? JSON.parse(data) : DEFAULT_SETTINGS;
+  } catch (error) {
+    console.error("Error reading settings from storage:", error);
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export function updateSettings(settings: Partial<Settings>): Settings {
+  const current = getSettings();
+  const updated = { ...current, ...settings };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(updated));
+  return updated;
+}
 
 export function getBugTracking(): BugTrackingItem[] {
   try {
@@ -49,7 +76,8 @@ export function addBugTracking(
   targetHML: string,
   targetPRD: string,
   developerId: string,
-  productId: string
+  productId: string,
+  horasGastas?: number
 ): BugTrackingItem {
   const items = getBugTracking();
   const newItem: BugTrackingItem = {
@@ -63,6 +91,7 @@ export function addBugTracking(
     status: "planejado",
     developerId,
     productId,
+    horasGastas,
     createdAt: new Date().toISOString(),
   };
   items.push(newItem);
@@ -93,10 +122,11 @@ export function deleteBugTracking(id: string): boolean {
 export function calculateResourceMaximization(
   developerId: string,
   developerName: string,
-  monthlyCost: number
+  monthlyCost: number,
+  hourlyRate: number = 250
 ): ResourceMaximization {
-  // 100 horas por 250 reais = 2.5 reais por hora
-  const revenuePerHour = 2.5;
+  // Calcular receita por hora baseado no valor configurável
+  const revenuePerHour = hourlyRate / 100; // Valor da hora / 100 horas
   const costPerDay = monthlyCost / 22; // assumindo 22 dias úteis por mês
 
   const scenarios: ScenarioResult[] = [];

@@ -1,5 +1,5 @@
 import { Developer } from "@/lib/storage";
-import { calculateResourceMaximization } from "@/lib/bugTracking";
+import { calculateResourceMaximization, getSettings, updateSettings } from "@/lib/bugTracking";
 import { useState } from "react";
 import {
   Select,
@@ -17,6 +17,9 @@ export default function ResourceMaximizationDashboard({
   developers,
 }: ResourceMaximizationDashboardProps) {
   const [selectedDevId, setSelectedDevId] = useState(developers[0]?.id || "");
+  const [settings, setSettings] = useState(getSettings());
+  const [editingRate, setEditingRate] = useState(false);
+  const [newRate, setNewRate] = useState(settings.hourlyRate.toString());
 
   if (!selectedDevId || developers.length === 0) {
     return (
@@ -29,10 +32,20 @@ export default function ResourceMaximizationDashboard({
   const selectedDev = developers.find((d) => d.id === selectedDevId);
   if (!selectedDev) return null;
 
+  const handleSaveRate = () => {
+    const rate = parseFloat(newRate);
+    if (rate > 0) {
+      const updated = updateSettings({ hourlyRate: rate });
+      setSettings(updated);
+      setEditingRate(false);
+    }
+  };
+
   const maximization = calculateResourceMaximization(
     selectedDev.id,
     selectedDev.name,
-    selectedDev.monthlyCost
+    selectedDev.monthlyCost,
+    settings.hourlyRate
   );
 
   // Filtrar cenários relevantes (1, 5, 10, 15, 20, 25, 30 dias)
@@ -73,9 +86,40 @@ export default function ResourceMaximizationDashboard({
 
       <div className="p-4 bg-blue-50 rounded border border-blue-200">
         <h3 className="font-semibold text-blue-900 mb-2">Cenário Base</h3>
-        <p className="text-sm text-blue-800">
-          <strong>100 horas</strong> por <strong>R$ 250</strong> = <strong>R$ 2.50/hora</strong>
-        </p>
+        <div className="flex items-center gap-2 mb-2">
+          <p className="text-sm text-blue-800">
+            <strong>100 horas</strong> por <strong>R$ {settings.hourlyRate.toFixed(2)}</strong> = <strong>R$ {(settings.hourlyRate / 100).toFixed(2)}/hora</strong>
+          </p>
+          {!editingRate ? (
+            <button
+              onClick={() => setEditingRate(true)}
+              className="text-xs px-2 py-1 bg-blue-200 text-blue-900 rounded hover:bg-blue-300"
+            >
+              Editar
+            </button>
+          ) : (
+            <div className="flex gap-1">
+              <input
+                type="number"
+                value={newRate}
+                onChange={(e) => setNewRate(e.target.value)}
+                className="w-20 px-2 py-1 border rounded text-sm"
+              />
+              <button
+                onClick={handleSaveRate}
+                className="text-xs px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Salvar
+              </button>
+              <button
+                onClick={() => setEditingRate(false)}
+                className="text-xs px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+        </div>
         <p className="text-sm text-blue-800">
           Custo do dev: <strong>R$ {selectedDev.monthlyCost.toFixed(2)}/mês</strong> (~R$ {(selectedDev.monthlyCost / 22).toFixed(2)}/dia)
         </p>

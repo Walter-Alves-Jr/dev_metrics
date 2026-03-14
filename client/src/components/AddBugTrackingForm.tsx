@@ -31,6 +31,7 @@ export default function AddBugTrackingForm({
   const [targetPRD, setTargetPRD] = useState("");
   const [developerId, setDeveloperId] = useState("");
   const [productId, setProductId] = useState("");
+  const [horasGastas, setHorasGastas] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -72,6 +73,11 @@ export default function AddBugTrackingForm({
       return;
     }
 
+    if (type === "bug" && !horasGastas) {
+      setError("Horas gastas é obrigatório para bugs");
+      return;
+    }
+
     addBugTracking(
       title,
       type,
@@ -80,7 +86,8 @@ export default function AddBugTrackingForm({
       targetHML,
       targetPRD,
       developerId,
-      productId
+      productId,
+      type === "bug" ? parseFloat(horasGastas) : undefined
     );
 
     setTitle("");
@@ -91,6 +98,7 @@ export default function AddBugTrackingForm({
     setTargetPRD("");
     setDeveloperId("");
     setProductId("");
+    setHorasGastas("");
     onItemAdded();
   };
 
@@ -123,14 +131,27 @@ export default function AddBugTrackingForm({
       </div>
 
       {type === "bug" && (
-        <div>
-          <Label>Data do BUG</Label>
-          <Input
-            type="date"
-            value={dataBug}
-            onChange={(e) => setDataBug(e.target.value)}
-          />
-        </div>
+        <>
+          <div>
+            <Label>Data do BUG</Label>
+            <Input
+              type="date"
+              value={dataBug}
+              onChange={(e) => setDataBug(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label>Horas Gastas para Resolver</Label>
+            <Input
+              type="number"
+              step="0.5"
+              min="0"
+              value={horasGastas}
+              onChange={(e) => setHorasGastas(e.target.value)}
+              placeholder="Ex: 2.5"
+            />
+          </div>
+        </>
       )}
 
       <div>
