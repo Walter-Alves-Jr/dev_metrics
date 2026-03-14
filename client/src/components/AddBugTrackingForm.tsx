@@ -59,13 +59,13 @@ export default function AddBugTrackingForm({
       return;
     }
 
-    if (!targetHML) {
-      setError("Target HML é obrigatório");
+    if (type === "projeto" && !targetHML) {
+      setError("Target HML é obrigatório para projetos");
       return;
     }
 
-    if (!targetPRD) {
-      setError("Target PRD é obrigatório");
+    if (type === "projeto" && !targetPRD) {
+      setError("Target PRD é obrigatório para projetos");
       return;
     }
 
@@ -84,8 +84,8 @@ export default function AddBugTrackingForm({
       type,
       type === "bug" ? dataBug : undefined,
       dataInicio,
-      targetHML,
-      targetPRD,
+      type === "projeto" ? targetHML : "",
+      type === "projeto" ? targetPRD : "",
       developerId,
       productId,
       type === "bug" ? parseFloat(horasGastas) : undefined,
@@ -174,23 +174,27 @@ export default function AddBugTrackingForm({
         />
       </div>
 
-      <div>
-        <Label>Target Data HML</Label>
-        <Input
-          type="date"
-          value={targetHML}
-          onChange={(e) => setTargetHML(e.target.value)}
-        />
-      </div>
+      {type === "projeto" && (
+        <>
+          <div>
+            <Label>Target Data HML</Label>
+            <Input
+              type="date"
+              value={targetHML}
+              onChange={(e) => setTargetHML(e.target.value)}
+            />
+          </div>
 
-      <div>
-        <Label>Target Data PRD</Label>
-        <Input
-          type="date"
-          value={targetPRD}
-          onChange={(e) => setTargetPRD(e.target.value)}
-        />
-      </div>
+          <div>
+            <Label>Target Data PRD</Label>
+            <Input
+              type="date"
+              value={targetPRD}
+              onChange={(e) => setTargetPRD(e.target.value)}
+            />
+          </div>
+        </>
+      )}
 
       <div>
         <Label>Desenvolvedor</Label>
