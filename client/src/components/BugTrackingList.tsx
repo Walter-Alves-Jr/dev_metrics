@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { BugTrackingItem, deleteBugTracking, getSettings } from "@/lib/bugTracking";
+import { Trash2, Edit2, Check, X } from "lucide-react";
+import { BugTrackingItem, deleteBugTracking, getSettings, updateBugTracking } from "@/lib/bugTracking";
 import { getDevelopers, getProducts } from "@/lib/storage";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
 
 interface BugTrackingListProps {
   items: BugTrackingItem[];
@@ -9,6 +11,8 @@ interface BugTrackingListProps {
 }
 
 export default function BugTrackingList({ items, onItemDeleted }: BugTrackingListProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingHoras, setEditingHoras] = useState("");
   const developers = getDevelopers();
   const products = getProducts();
   const settings = getSettings();
@@ -85,6 +89,26 @@ export default function BugTrackingList({ items, onItemDeleted }: BugTrackingLis
     }
   };
 
+  const handleEditHoras = (item: BugTrackingItem) => {
+    setEditingId(item.id);
+    setEditingHoras((item.horasReais || "").toString());
+  };
+
+  const handleSaveHoras = (id: string) => {
+    const horas = parseFloat(editingHoras);
+    if (!isNaN(horas) && horas >= 0) {
+      updateBugTracking(id, { horasReais: horas });
+      setEditingId(null);
+      setEditingHoras("");
+      onItemDeleted();
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingHoras("");
+  };
+
   if (items.length === 0) {
     return (
       <div className="p-4 text-center text-gray-500">
@@ -120,6 +144,74 @@ export default function BugTrackingList({ items, onItemDeleted }: BugTrackingLis
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
+
+            {item.type === "projeto" && (
+              <div className="p-3 bg-blue-50 rounded border border-blue-200 mb-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                  <div>
+                    <p className="text-blue-700 font-semibold">Horas Orçadas</p>
+                    <p className="text-blue-900 text-lg font-bold">{item.horasOrcadas || 0}h</p>
+                  </div>
+                  <div>
+                    <p className="text-blue-700 font-semibold">Horas Reais</p>
+                    {editingId === item.id ? (
+                      <div className="flex gap-1 mt-1">
+                        <Input
+                          type="number"
+                          step="0.5"
+                          min="0"
+                          value={editingHoras}
+                          onChange={(e) => setEditingHoras(e.target.value)}
+                          className="w-16 h-8 text-sm"
+                        />
+                        <button
+                          onClick={() => handleSaveHoras(item.id)}
+                          className="p-1 bg-green-500 text-white rounded hover:bg-green-600"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="p-1 bg-gray-400 text-white rounded hover:bg-gray-500"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <p className="text-blue-900 text-lg font-bold">{item.horasReais || "-"}h</p>
+                        <button
+                          onClick={() => handleEditHoras(item)}
+                          className="p-1 bg-blue-200 text-blue-700 rounded hover:bg-blue-300"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {item.horasOrcadas && item.horasReais && (
+                    <>
+                      <div>
+                        <p className="text-blue-700 font-semibold">Eficiência</p>
+                        <p className={`text-lg font-bold ${
+                          (item.horasReais / item.horasOrcadas) * 100 <= 100 ? "text-green-700" : "text-orange-700"
+                        }`}>
+                          {((item.horasReais / item.horasOrcadas) * 100).toFixed(0)}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-blue-700 font-semibold">Diferença</p>
+                        <p className={`text-lg font-bold ${
+                          item.horasReais <= item.horasOrcadas ? "text-green-700" : "text-red-700"
+                        }`}>
+                          {(item.horasReais - item.horasOrcadas).toFixed(1)}h
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-sm mb-2">
               {item.type === "bug" && item.dataBug && (

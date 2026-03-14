@@ -11,6 +11,8 @@ export type BugTrackingItem = {
   developerId: string;
   productId: string;
   horasGastas?: number; // Horas gastas para resolver (apenas para bugs)
+  horasOrcadas?: number; // Horas orçadas (planejadas)
+  horasReais?: number; // Horas reais gastas
   createdAt: string;
 };
 
@@ -79,7 +81,9 @@ export function addBugTracking(
   developerId: string,
   productId: string,
   horasGastas?: number,
-  dataResolucao?: string
+  dataResolucao?: string,
+  horasOrcadas?: number,
+  horasReais?: number
 ): BugTrackingItem {
   const items = getBugTracking();
   const newItem: BugTrackingItem = {
@@ -95,6 +99,8 @@ export function addBugTracking(
     developerId,
     productId,
     horasGastas,
+    horasOrcadas,
+    horasReais,
     createdAt: new Date().toISOString(),
   };
   items.push(newItem);

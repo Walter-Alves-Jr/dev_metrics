@@ -33,6 +33,8 @@ export default function AddBugTrackingForm({
   const [productId, setProductId] = useState("");
   const [horasGastas, setHorasGastas] = useState("");
   const [dataResolucao, setDataResolucao] = useState("");
+  const [horasOrcadas, setHorasOrcadas] = useState("");
+  const [horasReais, setHorasReais] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,7 +91,9 @@ export default function AddBugTrackingForm({
       developerId,
       productId,
       type === "bug" ? parseFloat(horasGastas) : undefined,
-      type === "bug" ? dataResolucao : undefined
+      type === "bug" ? dataResolucao : undefined,
+      horasOrcadas ? parseFloat(horasOrcadas) : undefined,
+      horasReais ? parseFloat(horasReais) : undefined
     );
 
     setTitle("");
@@ -102,6 +106,8 @@ export default function AddBugTrackingForm({
     setProductId("");
     setHorasGastas("");
     setDataResolucao("");
+    setHorasOrcadas("");
+    setHorasReais("");
     onItemAdded();
   };
 
@@ -227,6 +233,34 @@ export default function AddBugTrackingForm({
           </SelectContent>
         </Select>
       </div>
+
+      {type === "projeto" && (
+        <>
+          <div>
+            <Label>Horas Orçadas (Planejadas)</Label>
+            <Input
+              type="number"
+              step="0.5"
+              min="0"
+              value={horasOrcadas}
+              onChange={(e) => setHorasOrcadas(e.target.value)}
+              placeholder="Ex: 40"
+            />
+          </div>
+
+          <div>
+            <Label>Horas Reais (Opcional - preencher depois)</Label>
+            <Input
+              type="number"
+              step="0.5"
+              min="0"
+              value={horasReais}
+              onChange={(e) => setHorasReais(e.target.value)}
+              placeholder="Ex: 42"
+            />
+          </div>
+        </>
+      )}
 
       <Button type="submit" className="w-full">
         Adicionar

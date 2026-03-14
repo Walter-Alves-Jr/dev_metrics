@@ -168,7 +168,9 @@ export default function ResourceMaximizationDashboard({
               <thead>
                 <tr className="bg-gray-100 border-b border-gray-300">
                   <th className="p-2 text-left font-semibold text-gray-700">Projeto/Bug</th>
-                  <th className="p-2 text-right font-semibold text-gray-700">Horas</th>
+                  <th className="p-2 text-right font-semibold text-gray-700">Orcado</th>
+                  <th className="p-2 text-right font-semibold text-gray-700">Real</th>
+                  <th className="p-2 text-right font-semibold text-gray-700">Eficiencia</th>
                   <th className="p-2 text-right font-semibold text-gray-700">Receita</th>
                   <th className="p-2 text-right font-semibold text-gray-700">Custo</th>
                   <th className="p-2 text-right font-semibold text-gray-700">Lucro</th>
@@ -177,9 +179,11 @@ export default function ResourceMaximizationDashboard({
               </thead>
               <tbody>
                 {devItems.map((item) => {
-                  const hours = item.horasGastas || 0;
-                  const itemRevenue = hours * (settings.hourlyRate / 100);
-                  const itemCost = hours * costPerHour;
+                  const horasOrcadas = item.horasOrcadas || item.horasGastas || 0;
+                  const horasReais = item.horasReais || horasOrcadas;
+                  const eficiencia = horasOrcadas > 0 ? (horasReais / horasOrcadas) * 100 : 0;
+                  const itemRevenue = horasReais * (settings.hourlyRate / 100);
+                  const itemCost = horasReais * costPerHour;
                   const itemProfit = itemRevenue - itemCost;
                   const itemROI = itemCost > 0 ? ((itemProfit / itemCost) * 100) : 0;
 
@@ -189,7 +193,15 @@ export default function ResourceMaximizationDashboard({
                         <span className="text-xs mr-1">{item.type === "bug" ? "🐛" : "📋"}</span>
                         {item.title}
                       </td>
-                      <td className="p-2 text-right text-gray-700">{hours}h</td>
+                      <td className="p-2 text-right text-gray-700">{horasOrcadas}h</td>
+                      <td className="p-2 text-right text-gray-700">{horasReais}h</td>
+                      <td className="p-2 text-right text-gray-700">
+                        <span className={`font-semibold ${
+                          eficiencia <= 100 ? "text-green-700" : "text-orange-700"
+                        }`}>
+                          {eficiencia.toFixed(0)}%
+                        </span>
+                      </td>
                       <td className="p-2 text-right text-gray-700">R$ {itemRevenue.toFixed(2)}</td>
                       <td className="p-2 text-right text-gray-700">R$ {itemCost.toFixed(2)}</td>
                       <td className={`p-2 text-right font-semibold ${itemProfit >= 0 ? "text-green-700" : "text-red-700"}`}>
