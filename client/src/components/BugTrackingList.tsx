@@ -45,21 +45,36 @@ export default function BugTrackingList({ items, onItemDeleted }: BugTrackingLis
   };
 
   const calculateBugAnalysis = (item: BugTrackingItem) => {
-    if (item.type !== "bug" || !item.horasGastas) return null;
+    if (item.type !== "bug" || !item.dataBug) return null;
     
     const devCost = getDeveloperCost(item.developerId);
     const costPerHour = devCost / 160; // 160 horas por mês (22 dias * 8 horas)
-    const totalCost = item.horasGastas * costPerHour;
-    const revenue = item.horasGastas * (settings.hourlyRate / 100); // Receita por hora
+    
+    // Calcular tempo entre data do BUG e resolução (ou hoje se não resolvido)
+    const bugDate = new Date(item.dataBug);
+    const resolutionDate = item.dataResolucao ? new Date(item.dataResolucao) : new Date();
+    const timeDiffMs = resolutionDate.getTime() - bugDate.getTime();
+    const horasDecorridas = timeDiffMs / (1000 * 60 * 60); // Converter ms para horas
+    const diasDecorridos = horasDecorridas / 24;
+    
+    // Custo = horas decorridas * custo por hora
+    const totalCost = horasDecorridas * costPerHour;
+    
+    // Receita = horas gastas (se informado) ou horas decorridas * valor da hora
+    const horasParaReceita = item.horasGastas || horasDecorridas;
+    const revenue = horasParaReceita * (settings.hourlyRate / 100);
+    
     const profit = revenue - totalCost;
     const roi = totalCost > 0 ? ((profit / totalCost) * 100) : 0;
 
     return {
-      costPerHour,
-      totalCost,
-      revenue,
-      profit,
-      roi,
+      diasDecorridos: diasDecorridos.toFixed(1),
+      horasDecorridas: horasDecorridas.toFixed(1),
+      costPerHour: costPerHour.toFixed(2),
+      totalCost: totalCost.toFixed(2),
+      revenue: revenue.toFixed(2),
+      profit: profit.toFixed(2),
+      roi: roi.toFixed(0),
     };
   };
 
@@ -113,10 +128,10 @@ export default function BugTrackingList({ items, onItemDeleted }: BugTrackingLis
                     <p className="text-gray-600">Data BUG</p>
                     <p className="font-semibold">{formatDate(item.dataBug)}</p>
                   </div>
-                  {item.horasGastas !== undefined && (
+                  {item.dataResolucao && (
                     <div>
-                      <p className="text-gray-600">Horas Gastas</p>
-                      <p className="font-semibold">{item.horasGastas}h</p>
+                      <p className="text-gray-600">Data Resolução</p>
+                      <p className="font-semibold">{formatDate(item.dataResolucao)}</p>
                     </div>
                   )}
                 </>
@@ -144,30 +159,32 @@ export default function BugTrackingList({ items, onItemDeleted }: BugTrackingLis
             {/* Análise de BUG */}
             {bugAnalysis && (
               <div className="mt-3 p-3 bg-orange-50 rounded border border-orange-200">
-                <p className="text-xs font-semibold text-orange-900 mb-2">Análise de Custo vs Retorno</p>
+                <p className="text-xs font-semibold text-orange-900 mb-2">
+                  Análise de Custo vs Retorno (Tempo: {bugAnalysis.diasDecorridos} dias / {bugAnalysis.horasDecorridas}h)
+                </p>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                   <div>
                     <p className="text-orange-700">Custo/h Dev</p>
-                    <p className="font-semibold text-orange-900">R$ {bugAnalysis.costPerHour.toFixed(2)}</p>
+                    <p className="font-semibold text-orange-900">R$ {bugAnalysis.costPerHour}</p>
                   </div>
                   <div>
                     <p className="text-orange-700">Custo Total</p>
-                    <p className="font-semibold text-orange-900">R$ {bugAnalysis.totalCost.toFixed(2)}</p>
+                    <p className="font-semibold text-orange-900">R$ {bugAnalysis.totalCost}</p>
                   </div>
                   <div>
                     <p className="text-orange-700">Receita</p>
-                    <p className="font-semibold text-orange-900">R$ {bugAnalysis.revenue.toFixed(2)}</p>
+                    <p className="font-semibold text-orange-900">R$ {bugAnalysis.revenue}</p>
                   </div>
                   <div>
                     <p className="text-orange-700">Lucro</p>
-                    <p className={`font-semibold ${bugAnalysis.profit >= 0 ? "text-green-700" : "text-red-700"}`}>
-                      R$ {bugAnalysis.profit.toFixed(2)}
+                    <p className={`font-semibold ${parseFloat(bugAnalysis.profit) >= 0 ? "text-green-700" : "text-red-700"}`}>
+                      R$ {bugAnalysis.profit}
                     </p>
                   </div>
                   <div>
                     <p className="text-orange-700">ROI</p>
-                    <p className={`font-semibold ${bugAnalysis.roi >= 0 ? "text-green-700" : "text-red-700"}`}>
-                      {bugAnalysis.roi.toFixed(0)}%
+                    <p className={`font-semibold ${parseFloat(bugAnalysis.roi) >= 0 ? "text-green-700" : "text-red-700"}`}>
+                      {bugAnalysis.roi}%
                     </p>
                   </div>
                 </div>

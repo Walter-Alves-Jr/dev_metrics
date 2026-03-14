@@ -6,6 +6,7 @@ export type BugTrackingItem = {
   dataInicio: string; // Data Início Projeto
   targetHML: string; // Target Data HML
   targetPRD: string; // Target Data PRD
+  dataResolucao?: string; // Data de resolução do bug (apenas para bugs)
   status: "planejado" | "em_progresso" | "hml" | "prd" | "concluido";
   developerId: string;
   productId: string;
@@ -77,7 +78,8 @@ export function addBugTracking(
   targetPRD: string,
   developerId: string,
   productId: string,
-  horasGastas?: number
+  horasGastas?: number,
+  dataResolucao?: string
 ): BugTrackingItem {
   const items = getBugTracking();
   const newItem: BugTrackingItem = {
@@ -88,6 +90,7 @@ export function addBugTracking(
     dataInicio,
     targetHML,
     targetPRD,
+    dataResolucao,
     status: "planejado",
     developerId,
     productId,

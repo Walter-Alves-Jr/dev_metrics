@@ -32,6 +32,7 @@ export default function AddBugTrackingForm({
   const [developerId, setDeveloperId] = useState("");
   const [productId, setProductId] = useState("");
   const [horasGastas, setHorasGastas] = useState("");
+  const [dataResolucao, setDataResolucao] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -87,7 +88,8 @@ export default function AddBugTrackingForm({
       targetPRD,
       developerId,
       productId,
-      type === "bug" ? parseFloat(horasGastas) : undefined
+      type === "bug" ? parseFloat(horasGastas) : undefined,
+      type === "bug" ? dataResolucao : undefined
     );
 
     setTitle("");
@@ -99,6 +101,7 @@ export default function AddBugTrackingForm({
     setDeveloperId("");
     setProductId("");
     setHorasGastas("");
+    setDataResolucao("");
     onItemAdded();
   };
 
@@ -149,6 +152,14 @@ export default function AddBugTrackingForm({
               value={horasGastas}
               onChange={(e) => setHorasGastas(e.target.value)}
               placeholder="Ex: 2.5"
+            />
+          </div>
+          <div>
+            <Label>Data de Resolução (Opcional)</Label>
+            <Input
+              type="date"
+              value={dataResolucao}
+              onChange={(e) => setDataResolucao(e.target.value)}
             />
           </div>
         </>
