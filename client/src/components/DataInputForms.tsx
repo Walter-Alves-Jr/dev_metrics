@@ -199,51 +199,76 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
 
       {/* Developer Form */}
       {activeTab === "developer" && (
-        <div className="space-y-3 p-4 bg-gray-50 rounded">
-          <input
-            type="text"
-            placeholder="Nome do desenvolvedor"
-            value={devName}
-            onChange={(e) => setDevName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded"
-          />
-          <input
-            type="number"
-            placeholder="Salário base (R$)"
-            value={devBaseSalary}
-            onChange={(e) => setDevBaseSalary(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded"
-          />
-          <input
-            type="number"
-            placeholder="Sobreaviso (R$) - Opcional"
-            value={devOnCall}
-            onChange={(e) => setDevOnCall(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded"
-          />
-          <input
-            type="number"
-            placeholder="Horas extras (com 75% acréscimo) - Opcional"
-            value={devOvertimeHours}
-            onChange={(e) => setDevOvertimeHours(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded"
-          />
-          <Button onClick={handleCalculateDevCost} className="w-full" variant="outline">
-            Calcular Custo Real
-          </Button>
-          {realDevCost > 0 && (
-            <div className="p-3 bg-blue-50 rounded border border-blue-200">
-              <p className="text-sm text-blue-700">
-                <strong>Custo Real (com encargos CLT 1.7x):</strong>
-              </p>
-              <p className="text-2xl font-bold text-blue-900">
-                R$ {realDevCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-              </p>
+        <div className="space-y-4 p-4 bg-gray-50 rounded">
+          <div>
+            <h3 className="font-semibold mb-3">Cadastrar Novo Desenvolvedor</h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Nome do desenvolvedor"
+                value={devName}
+                onChange={(e) => setDevName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+              <input
+                type="number"
+                placeholder="Salário base (R$)"
+                value={devBaseSalary}
+                onChange={(e) => setDevBaseSalary(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+              <input
+                type="number"
+                placeholder="Sobreaviso (R$) - Opcional"
+                value={devOnCall}
+                onChange={(e) => setDevOnCall(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+              <input
+                type="number"
+                placeholder="Horas extras (com 75% acréscimo) - Opcional"
+                value={devOvertimeHours}
+                onChange={(e) => setDevOvertimeHours(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+              <Button onClick={handleCalculateDevCost} className="w-full" variant="outline">
+                Calcular Custo Real
+              </Button>
+              {realDevCost > 0 && (
+                <div className="p-3 bg-blue-50 rounded border border-blue-200">
+                  <p className="text-sm text-blue-700">
+                    <strong>Custo Real (com encargos CLT 1.7x):</strong>
+                  </p>
+                  <p className="text-2xl font-bold text-blue-900">
+                    R$ {realDevCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+              )}
+              <Button onClick={handleAddDeveloper} className="w-full">
+                Adicionar Desenvolvedor
+              </Button>
+            </div>
+          </div>
+
+          {/* Lista de Desenvolvedores */}
+          {developers.length > 0 && (
+            <div className="border-t pt-4">
+              <h3 className="font-semibold mb-3">Desenvolvedores Cadastrados</h3>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {developers.map((dev) => (
+                  <div key={dev.id} className="p-3 bg-white rounded border border-gray-200">
+                    <p className="font-semibold text-gray-900">{dev.name}</p>
+                    <p className="text-sm text-gray-600">
+                      Salário Base: R$ {dev.baseSalary.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Custo com CLT (1.7x): R$ {(dev.baseSalary * 1.7).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-          <Button onClick={handleAddDeveloper} className="w-full">
-            Adicionar Desenvolvedor
-          </Button>
         </div>
       )}
 
@@ -316,7 +341,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           />
           <input
             type="number"
-            placeholder="Valor por hora (R$)"
+            placeholder="Valor (R$)"
             value={projectValue}
             onChange={(e) => setProjectValue(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded"
@@ -332,7 +357,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
         <div className="space-y-3 p-4 bg-gray-50 rounded">
           <input
             type="text"
-            placeholder="Título do bug"
+            placeholder="Descrição do bug"
             value={bugTitle}
             onChange={(e) => setBugTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded"
@@ -364,9 +389,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           <select
             value={bugEnvironment}
             onChange={(e) =>
-              setBugEnvironment(
-                e.target.value as "production" | "staging" | "development"
-              )
+              setBugEnvironment(e.target.value as "production" | "staging" | "development")
             }
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
@@ -377,9 +400,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           <select
             value={bugSeverity}
             onChange={(e) =>
-              setBugSeverity(
-                e.target.value as "critical" | "high" | "medium" | "low"
-              )
+              setBugSeverity(e.target.value as "critical" | "high" | "medium" | "low")
             }
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
@@ -389,7 +410,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             <option value="low">Baixo</option>
           </select>
           <Button onClick={handleAddBug} className="w-full">
-            Adicionar Bug
+            Registrar Bug
           </Button>
         </div>
       )}
@@ -404,37 +425,27 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             }
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
-            <option value="production">Produção</option>
             <option value="staging">Staging</option>
+            <option value="production">Produção</option>
           </select>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                checked={deploySuccess}
-                onChange={() => setDeploySuccess(true)}
-              />
-              Sucesso
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                checked={!deploySuccess}
-                onChange={() => setDeploySuccess(false)}
-              />
-              Falha
-            </label>
-          </div>
-          {!deploySuccess && (
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={deployRollback}
-                onChange={(e) => setDeployRollback(e.target.checked)}
-              />
-              Rollback
-            </label>
-          )}
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={deploySuccess}
+              onChange={(e) => setDeploySuccess(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span>Deploy bem-sucedido</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={deployRollback}
+              onChange={(e) => setDeployRollback(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span>Rollback realizado</span>
+          </label>
           <Button onClick={handleAddDeployment} className="w-full">
             Registrar Deploy
           </Button>
@@ -454,9 +465,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           <select
             value={incidentSeverity}
             onChange={(e) =>
-              setIncidentSeverity(
-                e.target.value as "critical" | "high" | "medium" | "low"
-              )
+              setIncidentSeverity(e.target.value as "critical" | "high" | "medium" | "low")
             }
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
@@ -473,7 +482,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded"
           />
           <Button onClick={handleAddIncident} className="w-full">
-            Adicionar Incidente
+            Registrar Incidente
           </Button>
         </div>
       )}
