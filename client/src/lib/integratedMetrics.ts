@@ -1,11 +1,48 @@
 // Tipos integrados: DORA + Gestão de Devs e Projetos
 
+export type MonthlyDevCost = {
+  month: string; // "2026-03" format
+  onCallHours: number; // Horas de sobreaviso
+  overtimeHours: number; // Horas extras
+};
+
 export type Developer = {
   id: string;
   name: string;
-  costPerMonth: number; // R$ por mês
+  baseSalary: number; // R$ salário base
+  monthlyCosts: MonthlyDevCost[]; // Histórico mensal
   products: string[]; // IDs de produtos
 };
+
+// Função para calcular valor da hora de sobreaviso
+export function calculateOnCallHourValue(baseSalary: number): number {
+  return (baseSalary / 200) / 3;
+}
+
+// Função para calcular valor da hora extra
+export function calculateOvertimeHourValue(baseSalary: number): number {
+  return (baseSalary / 200) * 1.75;
+}
+
+// Função para calcular custo real do dev com encargos CLT (mês atual)
+export function calculateRealDevCost(dev: Developer, month?: string): number {
+  const baseCost = dev.baseSalary;
+  
+  // Se mês não especificado, usa mês atual
+  const targetMonth = month || new Date().toISOString().slice(0, 7);
+  const monthlyCost = dev.monthlyCosts.find((mc) => mc.month === targetMonth);
+  
+  const onCallCost = monthlyCost
+    ? calculateOnCallHourValue(dev.baseSalary) * monthlyCost.onCallHours
+    : 0;
+  
+  const overtimeCost = monthlyCost
+    ? calculateOvertimeHourValue(dev.baseSalary) * monthlyCost.overtimeHours
+    : 0;
+  
+  const totalCost = baseCost + onCallCost + overtimeCost;
+  return totalCost * 1.7; // Encargos CLT (1.7x)
+}
 
 export type Product = {
   id: string;
@@ -152,17 +189,47 @@ export function loadIncidents(): Incident[] {
 
 // Helper functions
 
-export function addDeveloper(name: string, costPerMonth: number): Developer {
+export function addDeveloper(name: string, baseSalary: number): Developer {
   const developers = loadDevelopers();
   const newDev: Developer = {
     id: Date.now().toString(),
     name,
-    costPerMonth,
+    baseSalary,
+    monthlyCosts: [],
     products: [],
   };
   developers.push(newDev);
   saveDevelopers(developers);
   return newDev;
+}
+
+export function updateDeveloper(devId: string, baseSalary?: number): void {
+  const developers = loadDevelopers();
+  const dev = developers.find((d) => d.id === devId);
+  if (dev && baseSalary !== undefined) {
+    dev.baseSalary = baseSalary;
+    saveDevelopers(developers);
+  }
+}
+
+export function updateMonthlyCost(
+  devId: string,
+  month: string,
+  onCallHours: number,
+  overtimeHours: number
+): void {
+  const developers = loadDevelopers();
+  const dev = developers.find((d) => d.id === devId);
+  if (dev) {
+    const existingMonth = dev.monthlyCosts.find((mc) => mc.month === month);
+    if (existingMonth) {
+      existingMonth.onCallHours = onCallHours;
+      existingMonth.overtimeHours = overtimeHours;
+    } else {
+      dev.monthlyCosts.push({ month, onCallHours, overtimeHours });
+    }
+    saveDevelopers(developers);
+  }
 }
 
 export function addProduct(name: string): Product {
