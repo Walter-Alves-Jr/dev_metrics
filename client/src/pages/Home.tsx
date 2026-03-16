@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DataInputForms from "@/components/DataInputForms";
-import DeveloperEditPanel from "@/components/DeveloperEditPanel";
+
 import ExecutiveDashboard from "@/components/ExecutiveDashboard";
 import FlowDashboard from "@/components/FlowDashboard";
 import SustentationDashboard from "@/components/SustentationDashboard";
@@ -104,11 +104,10 @@ export default function Home() {
 
         <Tabs defaultValue="entrada" className="w-full">
           <TabsList
-            className="grid w-full grid-cols-6 mb-4 overflow-x-auto"
+            className="grid w-full grid-cols-5 mb-4 overflow-x-auto"
             style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}
           >
             <TabsTrigger value="entrada">Entrada</TabsTrigger>
-            <TabsTrigger value="devs">Editar Devs</TabsTrigger>
             <TabsTrigger value="executivo">Executivo</TabsTrigger>
             <TabsTrigger value="fluxo">Fluxo</TabsTrigger>
             <TabsTrigger value="sustentacao">Sustentação</TabsTrigger>
@@ -122,16 +121,6 @@ export default function Home() {
                 Registrar Dados
               </h2>
               <DataInputForms onDataAdded={handleDataAdded} />
-            </div>
-          </TabsContent>
-
-          {/* Editar Devs */}
-          <TabsContent value="devs" className="space-y-4">
-            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
-              <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>
-                Editar Custos de Desenvolvedores
-              </h2>
-              <DeveloperEditPanel />
             </div>
           </TabsContent>
 
