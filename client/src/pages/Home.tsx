@@ -6,6 +6,7 @@ import ExecutiveDashboard from "@/components/ExecutiveDashboard";
 import FlowDashboard from "@/components/FlowDashboard";
 import SustentationDashboard from "@/components/SustentationDashboard";
 import QualityDashboard from "@/components/QualityDashboard";
+import ROIDashboard from "@/components/ROIDashboard";
 import {
   loadProjects,
   loadBugs,
@@ -104,7 +105,7 @@ export default function Home() {
 
         <Tabs defaultValue="entrada" className="w-full">
           <TabsList
-            className="grid w-full grid-cols-5 mb-4 overflow-x-auto"
+            className="grid w-full grid-cols-6 mb-4 overflow-x-auto"
             style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}
           >
             <TabsTrigger value="entrada">Entrada</TabsTrigger>
@@ -112,6 +113,7 @@ export default function Home() {
             <TabsTrigger value="fluxo">Fluxo</TabsTrigger>
             <TabsTrigger value="sustentacao">Sustentação</TabsTrigger>
             <TabsTrigger value="qualidade">Qualidade</TabsTrigger>
+            <TabsTrigger value="roi">ROI</TabsTrigger>
           </TabsList>
 
           {/* Entrada de Dados */}
@@ -154,6 +156,13 @@ export default function Home() {
           <TabsContent value="qualidade" className="space-y-4">
             <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
               <QualityDashboard tasks={tasks} bugs={bugs} testCoverage={72} />
+            </div>
+          </TabsContent>
+
+          {/* Dashboard de ROI */}
+          <TabsContent value="roi" className="space-y-4">
+            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
+              <ROIDashboard />
             </div>
           </TabsContent>
         </Tabs>

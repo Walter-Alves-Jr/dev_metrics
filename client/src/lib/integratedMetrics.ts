@@ -44,6 +44,26 @@ export function calculateRealDevCost(dev: Developer, month?: string): number {
   return totalCost * 1.7; // Encargos CLT (1.7x)
 }
 
+// Função para calcular custo por hora do desenvolvedor
+export function calculateDevCostPerHour(dev: Developer, month?: string): number {
+  const monthlyCost = calculateRealDevCost(dev, month);
+  // Considerando 200 horas de trabalho por mês
+  return monthlyCost / 200;
+}
+
+// Função para calcular ROI de um projeto
+export function calculateProjectROI(projectValue: number, hoursSpent: number, costPerHour: number): number {
+  const totalCost = hoursSpent * costPerHour;
+  const profit = projectValue - totalCost;
+  if (totalCost === 0) return 0;
+  return (profit / totalCost) * 100;
+}
+
+// Função para calcular impacto financeiro de um bug
+export function calculateBugFinancialImpact(hoursSpent: number, costPerHour: number): number {
+  return hoursSpent * costPerHour;
+}
+
 export type Product = {
   id: string;
   name: string;

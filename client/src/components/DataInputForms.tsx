@@ -11,6 +11,7 @@ import {
   loadProducts,
   updateDeveloper,
   updateMonthlyCost,
+  calculateDevCostPerHour,
 } from "@/lib/integratedMetrics";
 import { toast } from "sonner";
 
@@ -311,6 +312,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
                 {normalizedDevelopers.map((dev) => {
                   const baseSalary = Number(dev.baseSalary) || 0;
                   const costWithCLT = baseSalary * 1.7;
+                  const costPerHour = calculateDevCostPerHour(dev);
                   const isEditing = editingDevId === dev.id;
 
                   return (
@@ -318,13 +320,16 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
                       {!isEditing ? (
                         <>
                           <div className="flex justify-between items-start mb-2">
-                            <div>
+                            <div className="flex-1">
                               <p className="font-semibold text-gray-900">{dev.name}</p>
                               <p className="text-sm text-gray-600">
                                 Salário Base: R$ {baseSalary.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                               </p>
                               <p className="text-sm text-gray-600">
                                 Custo com CLT (1.7x): R$ {costWithCLT.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-sm font-semibold text-blue-600">
+                                Valor/Hora: R$ {costPerHour.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                               </p>
                             </div>
                             <button
