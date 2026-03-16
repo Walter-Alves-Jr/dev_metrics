@@ -122,7 +122,7 @@ export default function Home() {
               <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>
                 Registrar Dados
               </h2>
-              <DataInputForms onDataAdded={handleDataAdded} />
+              <DataInputForms onDataAdded={handleDataAdded} key={refreshKey} />
             </div>
           </TabsContent>
 

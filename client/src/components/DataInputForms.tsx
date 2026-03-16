@@ -96,11 +96,15 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
       }
 
       toast.success("Desenvolvedor atualizado!");
+      
+      // Limpar estado de edição
       setEditingDevId(null);
       setEditBaseSalary("");
       setEditOnCallHours("");
       setEditOvertimeHours("");
-      // Forçar recarga de dados
+      
+      // Forçar recarga de dados - IMPORTANTE: isso vai recarregar a lista
+      console.log("Chamando onDataAdded para recarregar dados");
       onDataAdded?.();
     } catch (error) {
       toast.error("Erro ao atualizar desenvolvedor");
@@ -228,11 +232,17 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
   // Normalizar dados de desenvolvedor para evitar erros de tipo
   const normalizedDevelopers = developers.map((dev) => {
     const baseSalary = typeof dev.baseSalary === "string" ? parseFloat(dev.baseSalary) : dev.baseSalary;
-    console.log(`Dev ${dev.name}: baseSalary = ${baseSalary}`);
+    // Remover log para evitar poluição de console
     return {
       ...dev,
       baseSalary,
     };
+  });
+  
+  // Debug: verificar se developers foi carregado corretamente
+  console.log(`DataInputForms renderizado com ${normalizedDevelopers.length} devs`);
+  normalizedDevelopers.forEach(dev => {
+    console.log(`  - ${dev.name}: R$ ${dev.baseSalary}`);
   });
 
   return (
