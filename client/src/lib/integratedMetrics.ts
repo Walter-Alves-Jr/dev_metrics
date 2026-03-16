@@ -127,7 +127,20 @@ export function saveDevelopers(developers: Developer[]): void {
 
 export function loadDevelopers(): Developer[] {
   const data = localStorage.getItem("dev_metrics_developers");
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  
+  const developers = JSON.parse(data);
+  // Normalizar baseSalary para número
+  return developers.map((d: any) => ({
+    ...d,
+    baseSalary: Number(d.baseSalary ?? 0) || 0,
+    monthlyCosts: Array.isArray(d.monthlyCosts) ? d.monthlyCosts.map((mc: any) => ({
+      month: mc.month || new Date().toISOString().slice(0, 7),
+      onCallHours: Number(mc.onCallHours ?? 0) || 0,
+      overtimeHours: Number(mc.overtimeHours ?? 0) || 0,
+    })) : [],
+    products: Array.isArray(d.products) ? d.products : [],
+  }));
 }
 
 export function saveProducts(products: Product[]): void {
@@ -148,9 +161,12 @@ export function loadProjects(): Project[] {
   if (!data) return [];
   
   const projects = JSON.parse(data);
-  // Converter strings de data para Date objects
+  // Converter strings de data para Date objects e normalizar números
   return projects.map((p: any) => ({
     ...p,
+    hoursPlanned: Number(p.hoursPlanned ?? 0) || 0,
+    hoursActual: p.hoursActual ? Number(p.hoursActual) || 0 : undefined,
+    valuePerHour: Number(p.valuePerHour ?? 0) || 0,
     createdAt: new Date(p.createdAt),
     devStartedAt: p.devStartedAt ? new Date(p.devStartedAt) : undefined,
     reviewStartedAt: p.reviewStartedAt ? new Date(p.reviewStartedAt) : undefined,
@@ -168,11 +184,37 @@ export function loadBugs(): Bug[] {
   if (!data) return [];
   
   const bugs = JSON.parse(data);
-  return bugs.map((b: any) => ({
-    ...b,
-    foundAt: new Date(b.foundAt),
-    fixedAt: b.fixedAt ? new Date(b.fixedAt) : undefined,
-  }));
+  return bugs.map((b: any) => {
+    // Normalizar datas com fallback seguro
+    let foundAt: Date;
+    try {
+      foundAt = new Date(b.foundAt || new Date());
+      // Validar que é uma data válida
+      if (!Number.isFinite(foundAt.getTime())) {
+        foundAt = new Date();
+      }
+    } catch (e) {
+      foundAt = new Date();
+    }
+    
+    let fixedAt: Date | undefined;
+    if (b.fixedAt) {
+      try {
+        fixedAt = new Date(b.fixedAt);
+        if (!Number.isFinite(fixedAt.getTime())) {
+          fixedAt = undefined;
+        }
+      } catch (e) {
+        fixedAt = undefined;
+      }
+    }
+    
+    return {
+      ...b,
+      foundAt,
+      fixedAt,
+    };
+  });
 }
 
 export function saveDeployments(deployments: Deployment[]): void {
