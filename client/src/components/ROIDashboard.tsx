@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   loadDevelopers,
   loadProjects,
@@ -22,14 +21,21 @@ export default function ROIDashboard() {
   // Calcular ROI por projeto
   const projectsWithROI = projects.map((project) => {
     const dev = normalizedDevs.find((d) => d.id === project.developerId);
-    if (!dev) return { ...project, costPerHour: 0, totalCost: 0, roi: 0, profit: 0, hoursSpent: 0 };
+    if (!dev) return { ...project, costPerHour: 0, totalCost: 0, roi: 0, profit: 0, hoursSpent: 0, projectValue: 0 };
 
     const costPerHour = calculateDevCostPerHour(dev);
-    const hoursSpent = project.hoursActual || project.hoursPlanned;
-    const totalCost = hoursSpent * costPerHour;
-    const projectValue = project.valuePerHour * hoursSpent;
+    // Usar nullish coalescing para evitar tratar 0 como falso
+    const hoursSpent = Number(project.hoursActual ?? project.hoursPlanned ?? 0) || 0;
+    const valuePerHour = Number(project.valuePerHour ?? 0) || 0;
+    
+    // Garantir que são números válidos
+    const validHours = Number.isFinite(hoursSpent) ? hoursSpent : 0;
+    const validValue = Number.isFinite(valuePerHour) ? valuePerHour : 0;
+    
+    const totalCost = validHours * costPerHour;
+    const projectValue = validValue * validHours;
     const profit = projectValue - totalCost;
-    const roi = calculateProjectROI(projectValue, hoursSpent, costPerHour);
+    const roi = calculateProjectROI(projectValue, validHours, costPerHour);
 
     return {
       ...project,
@@ -37,7 +43,7 @@ export default function ROIDashboard() {
       totalCost,
       roi,
       profit,
-      hoursSpent,
+      hoursSpent: validHours,
       projectValue,
     };
   });
@@ -49,16 +55,30 @@ export default function ROIDashboard() {
 
     const costPerHour = calculateDevCostPerHour(dev);
     // Calcular horas gastas baseado em data de criação e resolução
-    const createdDate = new Date(bug.foundAt);
-    const resolvedDate = bug.fixedAt ? new Date(bug.fixedAt) : new Date();
-    const hoursSpent = (resolvedDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+    let hoursSpent = 0;
+    
+    try {
+      const createdDate = new Date(bug.foundAt || new Date());
+      const resolvedDate = bug.fixedAt ? new Date(bug.fixedAt) : new Date();
+      
+      // Validar que as datas são válidas
+      const createdMs = createdDate.getTime();
+      const resolvedMs = resolvedDate.getTime();
+      
+      if (Number.isFinite(createdMs) && Number.isFinite(resolvedMs)) {
+        hoursSpent = Math.max(0, (resolvedMs - createdMs) / (1000 * 60 * 60));
+      }
+    } catch (e) {
+      hoursSpent = 0;
+    }
+    
     const financialImpact = calculateBugFinancialImpact(hoursSpent, costPerHour);
 
     return {
       ...bug,
       costPerHour,
       financialImpact,
-      hoursSpent: Math.max(0, hoursSpent),
+      hoursSpent: Number.isFinite(hoursSpent) ? hoursSpent : 0,
     };
   });
 
@@ -135,7 +155,7 @@ export default function ROIDashboard() {
                   return (
                     <tr key={project.id} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="p-2 text-gray-900 font-medium">{project.title}</td>
-                      <td className="p-2 text-right text-gray-700">{project.hoursSpent.toFixed(1)}h</td>
+                      <td className="p-2 text-right text-gray-700">{Number.isFinite(project.hoursSpent) ? project.hoursSpent.toFixed(1) : '0.0'}h</td>
                       <td className="p-2 text-right text-gray-700">
                         R$ {project.costPerHour.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </td>
@@ -213,7 +233,7 @@ export default function ROIDashboard() {
                           {bug.severity.charAt(0).toUpperCase() + bug.severity.slice(1)}
                         </span>
                       </td>
-                      <td className="p-2 text-right text-gray-700">{bug.hoursSpent.toFixed(1)}h</td>
+                      <td className="p-2 text-right text-gray-700">{Number.isFinite(bug.hoursSpent) ? bug.hoursSpent.toFixed(1) : '0.0'}h</td>
                       <td className="p-2 text-right text-gray-700">
                         R$ {bug.costPerHour.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </td>
