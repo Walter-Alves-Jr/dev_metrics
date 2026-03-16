@@ -1,0 +1,333 @@
+// Tipos integrados: DORA + Gestão de Devs e Projetos
+
+export type Developer = {
+  id: string;
+  name: string;
+  costPerMonth: number; // R$ por mês
+  products: string[]; // IDs de produtos
+};
+
+export type Product = {
+  id: string;
+  name: string;
+};
+
+export type Project = {
+  id: string;
+  title: string;
+  developerId: string;
+  productId: string;
+  type: "project" | "sustentation";
+  status: "backlog" | "dev" | "review" | "deploy" | "done";
+  hoursPlanned: number;
+  hoursActual?: number;
+  valuePerHour: number; // R$ por hora
+  createdAt: Date;
+  devStartedAt?: Date;
+  reviewStartedAt?: Date;
+  deployedAt?: Date;
+  completedAt?: Date;
+  reopened?: number;
+};
+
+export type Bug = {
+  id: string;
+  title: string;
+  developerId: string;
+  productId: string;
+  foundAt: Date;
+  fixedAt?: Date;
+  environment: "production" | "staging" | "development";
+  severity: "critical" | "high" | "medium" | "low";
+  hoursSpent?: number;
+};
+
+export type Deployment = {
+  id: string;
+  date: Date;
+  success: boolean;
+  rollback?: boolean;
+  environment: "staging" | "production";
+  projectId?: string;
+};
+
+export type Incident = {
+  id: string;
+  title: string;
+  openedAt: Date;
+  acknowledgedAt?: Date;
+  resolvedAt?: Date;
+  severity: "critical" | "high" | "medium" | "low";
+  recurring?: boolean;
+  slaTargetHours: number;
+};
+
+// Storage functions
+
+export function saveDevelopers(developers: Developer[]): void {
+  localStorage.setItem("dev_metrics_developers", JSON.stringify(developers));
+}
+
+export function loadDevelopers(): Developer[] {
+  const data = localStorage.getItem("dev_metrics_developers");
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveProducts(products: Product[]): void {
+  localStorage.setItem("dev_metrics_products", JSON.stringify(products));
+}
+
+export function loadProducts(): Product[] {
+  const data = localStorage.getItem("dev_metrics_products");
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveProjects(projects: Project[]): void {
+  localStorage.setItem("dev_metrics_projects", JSON.stringify(projects));
+}
+
+export function loadProjects(): Project[] {
+  const data = localStorage.getItem("dev_metrics_projects");
+  if (!data) return [];
+  
+  const projects = JSON.parse(data);
+  // Converter strings de data para Date objects
+  return projects.map((p: any) => ({
+    ...p,
+    createdAt: new Date(p.createdAt),
+    devStartedAt: p.devStartedAt ? new Date(p.devStartedAt) : undefined,
+    reviewStartedAt: p.reviewStartedAt ? new Date(p.reviewStartedAt) : undefined,
+    deployedAt: p.deployedAt ? new Date(p.deployedAt) : undefined,
+    completedAt: p.completedAt ? new Date(p.completedAt) : undefined,
+  }));
+}
+
+export function saveBugs(bugs: Bug[]): void {
+  localStorage.setItem("dev_metrics_bugs", JSON.stringify(bugs));
+}
+
+export function loadBugs(): Bug[] {
+  const data = localStorage.getItem("dev_metrics_bugs");
+  if (!data) return [];
+  
+  const bugs = JSON.parse(data);
+  return bugs.map((b: any) => ({
+    ...b,
+    foundAt: new Date(b.foundAt),
+    fixedAt: b.fixedAt ? new Date(b.fixedAt) : undefined,
+  }));
+}
+
+export function saveDeployments(deployments: Deployment[]): void {
+  localStorage.setItem("dev_metrics_deployments", JSON.stringify(deployments));
+}
+
+export function loadDeployments(): Deployment[] {
+  const data = localStorage.getItem("dev_metrics_deployments");
+  if (!data) return [];
+  
+  const deployments = JSON.parse(data);
+  return deployments.map((d: any) => ({
+    ...d,
+    date: new Date(d.date),
+  }));
+}
+
+export function saveIncidents(incidents: Incident[]): void {
+  localStorage.setItem("dev_metrics_incidents", JSON.stringify(incidents));
+}
+
+export function loadIncidents(): Incident[] {
+  const data = localStorage.getItem("dev_metrics_incidents");
+  if (!data) return [];
+  
+  const incidents = JSON.parse(data);
+  return incidents.map((i: any) => ({
+    ...i,
+    openedAt: new Date(i.openedAt),
+    acknowledgedAt: i.acknowledgedAt ? new Date(i.acknowledgedAt) : undefined,
+    resolvedAt: i.resolvedAt ? new Date(i.resolvedAt) : undefined,
+  }));
+}
+
+// Helper functions
+
+export function addDeveloper(name: string, costPerMonth: number): Developer {
+  const developers = loadDevelopers();
+  const newDev: Developer = {
+    id: Date.now().toString(),
+    name,
+    costPerMonth,
+    products: [],
+  };
+  developers.push(newDev);
+  saveDevelopers(developers);
+  return newDev;
+}
+
+export function addProduct(name: string): Product {
+  const products = loadProducts();
+  const newProduct: Product = {
+    id: Date.now().toString(),
+    name,
+  };
+  products.push(newProduct);
+  saveProducts(products);
+  return newProduct;
+}
+
+export function addProject(
+  title: string,
+  developerId: string,
+  productId: string,
+  type: "project" | "sustentation",
+  hoursPlanned: number,
+  valuePerHour: number
+): Project {
+  const projects = loadProjects();
+  const newProject: Project = {
+    id: Date.now().toString(),
+    title,
+    developerId,
+    productId,
+    type,
+    status: "backlog",
+    hoursPlanned,
+    valuePerHour,
+    createdAt: new Date(),
+  };
+  projects.push(newProject);
+  saveProjects(projects);
+  return newProject;
+}
+
+export function updateProjectStatus(
+  projectId: string,
+  status: Project["status"],
+  timestamp?: Date
+): void {
+  const projects = loadProjects();
+  const project = projects.find((p) => p.id === projectId);
+  if (!project) return;
+
+  project.status = status;
+  const now = timestamp || new Date();
+
+  switch (status) {
+    case "dev":
+      if (!project.devStartedAt) project.devStartedAt = now;
+      break;
+    case "review":
+      if (!project.reviewStartedAt) project.reviewStartedAt = now;
+      break;
+    case "deploy":
+      if (!project.deployedAt) project.deployedAt = now;
+      break;
+    case "done":
+      if (!project.completedAt) project.completedAt = now;
+      break;
+  }
+
+  saveProjects(projects);
+}
+
+export function updateProjectHours(
+  projectId: string,
+  hoursActual: number
+): void {
+  const projects = loadProjects();
+  const project = projects.find((p) => p.id === projectId);
+  if (project) {
+    project.hoursActual = hoursActual;
+    saveProjects(projects);
+  }
+}
+
+export function addBug(
+  title: string,
+  developerId: string,
+  productId: string,
+  environment: "production" | "staging" | "development",
+  severity: "critical" | "high" | "medium" | "low"
+): Bug {
+  const bugs = loadBugs();
+  const newBug: Bug = {
+    id: Date.now().toString(),
+    title,
+    developerId,
+    productId,
+    foundAt: new Date(),
+    environment,
+    severity,
+  };
+  bugs.push(newBug);
+  saveBugs(bugs);
+  return newBug;
+}
+
+export function fixBug(bugId: string, hoursSpent?: number): void {
+  const bugs = loadBugs();
+  const bug = bugs.find((b) => b.id === bugId);
+  if (bug) {
+    bug.fixedAt = new Date();
+    if (hoursSpent) bug.hoursSpent = hoursSpent;
+    saveBugs(bugs);
+  }
+}
+
+export function addDeployment(
+  success: boolean,
+  environment: "staging" | "production",
+  projectId?: string,
+  rollback?: boolean
+): Deployment {
+  const deployments = loadDeployments();
+  const newDeployment: Deployment = {
+    id: Date.now().toString(),
+    date: new Date(),
+    success,
+    rollback,
+    environment,
+    projectId,
+  };
+  deployments.push(newDeployment);
+  saveDeployments(deployments);
+  return newDeployment;
+}
+
+export function addIncident(
+  title: string,
+  severity: "critical" | "high" | "medium" | "low",
+  slaTargetHours: number
+): Incident {
+  const incidents = loadIncidents();
+  const newIncident: Incident = {
+    id: Date.now().toString(),
+    title,
+    openedAt: new Date(),
+    severity,
+    slaTargetHours,
+  };
+  incidents.push(newIncident);
+  saveIncidents(incidents);
+  return newIncident;
+}
+
+export function acknowledgeIncident(incidentId: string): void {
+  const incidents = loadIncidents();
+  const incident = incidents.find((i) => i.id === incidentId);
+  if (incident && !incident.acknowledgedAt) {
+    incident.acknowledgedAt = new Date();
+    saveIncidents(incidents);
+  }
+}
+
+export function resolveIncident(incidentId: string, recurring?: boolean): void {
+  const incidents = loadIncidents();
+  const incident = incidents.find((i) => i.id === incidentId);
+  if (incident) {
+    incident.resolvedAt = new Date();
+    if (recurring !== undefined) incident.recurring = recurring;
+    saveIncidents(incidents);
+  }
+}

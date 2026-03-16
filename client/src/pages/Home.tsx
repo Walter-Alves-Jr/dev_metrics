@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DataInputForms from "@/components/DataInputForms";
 import ExecutiveDashboard from "@/components/ExecutiveDashboard";
 import FlowDashboard from "@/components/FlowDashboard";
 import SustentationDashboard from "@/components/SustentationDashboard";
 import QualityDashboard from "@/components/QualityDashboard";
+import {
+  loadProjects,
+  loadBugs,
+  loadDeployments,
+  loadIncidents,
+} from "@/lib/integratedMetrics";
 import {
   DeploymentRecord,
   IncidentRecord,
@@ -12,107 +19,75 @@ import {
 } from "@/lib/doraMetrics";
 
 export default function Home() {
+  const [refreshKey, setRefreshKey] = useState(0);
   const [deployments, setDeployments] = useState<DeploymentRecord[]>([]);
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
   const [tasks, setTasks] = useState<TaskRecord[]>([]);
   const [bugs, setBugs] = useState<BugRecord[]>([]);
 
-  // Dados de exemplo para demonstração
+  const loadData = () => {
+    // Carregar projetos e converter para TaskRecord
+    const projects = loadProjects();
+    const projectTasks: TaskRecord[] = projects.map((p) => ({
+      id: p.id,
+      title: p.title,
+      status: p.status,
+      createdAt: p.createdAt,
+      devStartedAt: p.devStartedAt,
+      reviewStartedAt: p.reviewStartedAt,
+      deployedAt: p.deployedAt,
+      completedAt: p.completedAt,
+      reopened: p.reopened,
+      type: p.type,
+    }));
+
+    // Carregar bugs
+    const loadedBugs = loadBugs();
+    const bugRecords: BugRecord[] = loadedBugs.map((b) => ({
+      id: b.id,
+      title: b.title,
+      foundAt: b.foundAt,
+      fixedAt: b.fixedAt,
+      environment: b.environment,
+      severity: b.severity,
+    }));
+
+    // Carregar deployments
+    const loadedDeployments = loadDeployments();
+    const deploymentRecords: DeploymentRecord[] = loadedDeployments.map((d) => ({
+      id: d.id,
+      date: d.date,
+      success: d.success,
+      rollback: d.rollback,
+      environment: d.environment,
+    }));
+
+    // Carregar incidentes
+    const loadedIncidents = loadIncidents();
+    const incidentRecords: IncidentRecord[] = loadedIncidents.map((i) => ({
+      id: i.id,
+      title: i.title,
+      openedAt: i.openedAt,
+      acknowledgedAt: i.acknowledgedAt,
+      resolvedAt: i.resolvedAt,
+      severity: i.severity,
+      recurring: i.recurring,
+      slaTarget: i.slaTargetHours,
+    }));
+
+    setTasks(projectTasks);
+    setBugs(bugRecords);
+    setDeployments(deploymentRecords);
+    setIncidents(incidentRecords);
+  };
+
   useEffect(() => {
-    // Exemplo de dados
-    const mockDeployments: DeploymentRecord[] = [
-      {
-        id: "1",
-        date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-        success: true,
-        environment: "production",
-      },
-      {
-        id: "2",
-        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        success: true,
-        environment: "production",
-      },
-      {
-        id: "3",
-        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        success: false,
-        rollback: true,
-        environment: "production",
-      },
-    ];
+    loadData();
+  }, [refreshKey]);
 
-    const mockIncidents: IncidentRecord[] = [
-      {
-        id: "1",
-        title: "API lenta em produção",
-        openedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        acknowledgedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000),
-        resolvedAt: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000),
-        severity: "high",
-        slaTarget: 4,
-      },
-      {
-        id: "2",
-        title: "Erro de autenticação",
-        openedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        acknowledgedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000 + 15 * 60 * 1000),
-        resolvedAt: new Date(Date.now() - 4.8 * 24 * 60 * 60 * 1000),
-        severity: "critical",
-        recurring: true,
-        slaTarget: 2,
-      },
-    ];
-
-    const mockTasks: TaskRecord[] = [
-      {
-        id: "1",
-        title: "Implementar novo recurso",
-        status: "done",
-        createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-        devStartedAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
-        reviewStartedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        deployedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-        completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        type: "project",
-      },
-      {
-        id: "2",
-        title: "Corrigir bug de validação",
-        status: "done",
-        createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
-        devStartedAt: new Date(Date.now() - 7.5 * 24 * 60 * 60 * 1000),
-        reviewStartedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-        deployedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        completedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-        reopened: 1,
-        type: "sustentation",
-      },
-    ];
-
-    const mockBugs: BugRecord[] = [
-      {
-        id: "1",
-        title: "Erro ao salvar formulário",
-        foundAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        fixedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-        environment: "production",
-        severity: "high",
-      },
-      {
-        id: "2",
-        title: "Performance lenta em listagem",
-        foundAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        environment: "production",
-        severity: "medium",
-      },
-    ];
-
-    setDeployments(mockDeployments);
-    setIncidents(mockIncidents);
-    setTasks(mockTasks);
-    setBugs(mockBugs);
-  }, []);
+  const handleDataAdded = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F5F7FA" }}>
@@ -126,16 +101,27 @@ export default function Home() {
           </p>
         </header>
 
-        <Tabs defaultValue="executivo" className="w-full">
+        <Tabs defaultValue="entrada" className="w-full">
           <TabsList
-            className="grid w-full grid-cols-4 mb-4"
+            className="grid w-full grid-cols-5 mb-4"
             style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}
           >
+            <TabsTrigger value="entrada">Entrada de Dados</TabsTrigger>
             <TabsTrigger value="executivo">Executivo</TabsTrigger>
             <TabsTrigger value="fluxo">Fluxo</TabsTrigger>
             <TabsTrigger value="sustentacao">Sustentação</TabsTrigger>
             <TabsTrigger value="qualidade">Qualidade</TabsTrigger>
           </TabsList>
+
+          {/* Entrada de Dados */}
+          <TabsContent value="entrada" className="space-y-4">
+            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>
+                Registrar Dados
+              </h2>
+              <DataInputForms onDataAdded={handleDataAdded} />
+            </div>
+          </TabsContent>
 
           {/* Dashboard Executivo */}
           <TabsContent value="executivo" className="space-y-4">
