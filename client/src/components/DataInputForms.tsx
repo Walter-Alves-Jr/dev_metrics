@@ -23,31 +23,17 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
 
   // Developer Form
   const [devName, setDevName] = useState("");
-  const [devBaseSalary, setDevBaseSalary] = useState("");
-  const [devOnCall, setDevOnCall] = useState("");
-  const [devOvertimeHours, setDevOvertimeHours] = useState("");
-  const [realDevCost, setRealDevCost] = useState(0);
-
-  const handleCalculateDevCost = () => {
-    const baseSalary = parseFloat(devBaseSalary) || 0;
-    const onCall = parseFloat(devOnCall) || 0;
-    const overtimeHours = parseFloat(devOvertimeHours) || 0;
-    const totalCost = (baseSalary + onCall + overtimeHours * 1.75) * 1.7;
-    setRealDevCost(totalCost);
-  };
+  const [devCost, setDevCost] = useState("");
 
   const handleAddDeveloper = () => {
-    if (!devName || !devBaseSalary) {
-      toast.error("Preencha nome e salário base");
+    if (!devName || !devCost) {
+      toast.error("Preencha todos os campos");
       return;
     }
-    addDeveloper(devName, parseFloat(devBaseSalary));
+    addDeveloper(devName, parseFloat(devCost));
     toast.success("Desenvolvedor adicionado!");
     setDevName("");
-    setDevBaseSalary("");
-    setDevOnCall("");
-    setDevOvertimeHours("");
-    setRealDevCost(0);
+    setDevCost("");
     onDataAdded?.();
   };
 
@@ -209,38 +195,11 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           />
           <input
             type="number"
-            placeholder="Salário base (R$)"
-            value={devBaseSalary}
-            onChange={(e) => setDevBaseSalary(e.target.value)}
+            placeholder="Custo mensal (R$)"
+            value={devCost}
+            onChange={(e) => setDevCost(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           />
-          <input
-            type="number"
-            placeholder="Sobreaviso (R$) - Opcional"
-            value={devOnCall}
-            onChange={(e) => setDevOnCall(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded"
-          />
-          <input
-            type="number"
-            placeholder="Horas extras (com 75% acréscimo) - Opcional"
-            value={devOvertimeHours}
-            onChange={(e) => setDevOvertimeHours(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded"
-          />
-          <Button onClick={handleCalculateDevCost} className="w-full" variant="outline">
-            Calcular Custo Real
-          </Button>
-          {realDevCost > 0 && (
-            <div className="p-3 bg-blue-50 rounded border border-blue-200">
-              <p className="text-sm text-blue-700">
-                <strong>Custo Real (com encargos CLT 1.7x):</strong>
-              </p>
-              <p className="text-2xl font-bold text-blue-900">
-                R$ {realDevCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-              </p>
-            </div>
-          )}
           <Button onClick={handleAddDeveloper} className="w-full">
             Adicionar Desenvolvedor
           </Button>
@@ -281,7 +240,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             <option value="">Selecione o desenvolvedor</option>
             {developers.map((dev) => (
               <option key={dev.id} value={dev.id}>
-                {dev.name}
+                {dev.name} (R${dev.costPerMonth}/mês)
               </option>
             ))}
           </select>
