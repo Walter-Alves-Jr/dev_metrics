@@ -9,6 +9,8 @@ import {
   addIncident,
   loadDevelopers,
   loadProducts,
+  updateDeveloper,
+  updateMonthlyCost,
 } from "@/lib/integratedMetrics";
 import { toast } from "sonner";
 
@@ -27,6 +29,13 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
   const [devOnCall, setDevOnCall] = useState("");
   const [devOvertimeHours, setDevOvertimeHours] = useState("");
   const [realDevCost, setRealDevCost] = useState(0);
+
+  // Edit Developer State
+  const [editingDevId, setEditingDevId] = useState<string | null>(null);
+  const [editBaseSalary, setEditBaseSalary] = useState("");
+  const [editMonth, setEditMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [editOnCallHours, setEditOnCallHours] = useState("");
+  const [editOvertimeHours, setEditOvertimeHours] = useState("");
 
   const handleCalculateDevCost = () => {
     const baseSalary = parseFloat(devBaseSalary) || 0;
@@ -49,6 +58,44 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
     setDevOvertimeHours("");
     setRealDevCost(0);
     onDataAdded?.();
+  };
+
+  const handleStartEditDeveloper = (devId: string, baseSalary: number) => {
+    setEditingDevId(devId);
+    setEditBaseSalary(baseSalary.toString());
+    setEditOnCallHours("");
+    setEditOvertimeHours("");
+  };
+
+  const handleSaveEditDeveloper = () => {
+    if (!editingDevId) return;
+
+    if (editBaseSalary && parseFloat(editBaseSalary) > 0) {
+      updateDeveloper(editingDevId, parseFloat(editBaseSalary));
+    }
+
+    if (editOnCallHours || editOvertimeHours) {
+      updateMonthlyCost(
+        editingDevId,
+        editMonth,
+        parseFloat(editOnCallHours) || 0,
+        parseFloat(editOvertimeHours) || 0
+      );
+    }
+
+    toast.success("Desenvolvedor atualizado!");
+    setEditingDevId(null);
+    setEditBaseSalary("");
+    setEditOnCallHours("");
+    setEditOvertimeHours("");
+    onDataAdded?.();
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDevId(null);
+    setEditBaseSalary("");
+    setEditOnCallHours("");
+    setEditOvertimeHours("");
   };
 
   // Product Form
@@ -260,19 +307,104 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           {normalizedDevelopers.length > 0 && (
             <div className="border-t pt-4">
               <h3 className="font-semibold mb-3">Desenvolvedores Cadastrados</h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-96 overflow-y-auto">
                 {normalizedDevelopers.map((dev) => {
                   const baseSalary = Number(dev.baseSalary) || 0;
                   const costWithCLT = baseSalary * 1.7;
+                  const isEditing = editingDevId === dev.id;
+
                   return (
                     <div key={dev.id} className="p-3 bg-white rounded border border-gray-200">
-                      <p className="font-semibold text-gray-900">{dev.name}</p>
-                      <p className="text-sm text-gray-600">
-                        Salário Base: R$ {baseSalary.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Custo com CLT (1.7x): R$ {costWithCLT.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                      </p>
+                      {!isEditing ? (
+                        <>
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="font-semibold text-gray-900">{dev.name}</p>
+                              <p className="text-sm text-gray-600">
+                                Salário Base: R$ {baseSalary.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Custo com CLT (1.7x): R$ {costWithCLT.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleStartEditDeveloper(dev.id, baseSalary)}
+                              className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                            >
+                              Editar
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="space-y-3 p-3 bg-blue-50 rounded border border-blue-200">
+                          <h4 className="font-semibold text-gray-900">Editar {dev.name}</h4>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Salário Base (R$)
+                            </label>
+                            <input
+                              type="number"
+                              value={editBaseSalary}
+                              onChange={(e) => setEditBaseSalary(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Mês (YYYY-MM)
+                            </label>
+                            <input
+                              type="month"
+                              value={editMonth}
+                              onChange={(e) => setEditMonth(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Horas de Sobreaviso
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={editOnCallHours}
+                              onChange={(e) => setEditOnCallHours(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Horas Extras
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={editOvertimeHours}
+                              onChange={(e) => setEditOvertimeHours(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded"
+                            />
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleSaveEditDeveloper}
+                              className="flex-1 px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                            >
+                              Salvar
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="flex-1 px-3 py-2 text-sm bg-gray-400 text-white rounded hover:bg-gray-500 transition-colors"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
