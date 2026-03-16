@@ -3,9 +3,20 @@
 export type Developer = {
   id: string;
   name: string;
-  costPerMonth: number; // R$ por mês
+  baseSalary: number; // R$ salário base
+  onCall?: number; // R$ sobreaviso
+  overtimeHours?: number; // Horas extras (com 75% de acréscimo)
   products: string[]; // IDs de produtos
 };
+
+// Função para calcular custo real do dev com encargos CLT
+export function calculateRealDevCost(dev: Developer): number {
+  const baseCost = dev.baseSalary;
+  const onCallCost = dev.onCall || 0;
+  const overtimeCost = (dev.overtimeHours || 0) * 1.75; // 75% de acréscimo
+  const totalCost = baseCost + onCallCost + overtimeCost;
+  return totalCost * 1.7; // Encargos CLT (1.7x)
+}
 
 export type Product = {
   id: string;
@@ -152,17 +163,40 @@ export function loadIncidents(): Incident[] {
 
 // Helper functions
 
-export function addDeveloper(name: string, costPerMonth: number): Developer {
+export function addDeveloper(
+  name: string,
+  baseSalary: number,
+  onCall?: number,
+  overtimeHours?: number
+): Developer {
   const developers = loadDevelopers();
   const newDev: Developer = {
     id: Date.now().toString(),
     name,
-    costPerMonth,
+    baseSalary,
+    onCall,
+    overtimeHours,
     products: [],
   };
   developers.push(newDev);
   saveDevelopers(developers);
   return newDev;
+}
+
+export function updateDeveloper(
+  devId: string,
+  baseSalary?: number,
+  onCall?: number,
+  overtimeHours?: number
+): void {
+  const developers = loadDevelopers();
+  const dev = developers.find((d) => d.id === devId);
+  if (dev) {
+    if (baseSalary !== undefined) dev.baseSalary = baseSalary;
+    if (onCall !== undefined) dev.onCall = onCall;
+    if (overtimeHours !== undefined) dev.overtimeHours = overtimeHours;
+    saveDevelopers(developers);
+  }
 }
 
 export function addProduct(name: string): Product {
