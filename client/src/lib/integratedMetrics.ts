@@ -104,10 +104,21 @@ export type Incident = {
 export function saveDevelopers(developers: Developer[]): void {
   localStorage.setItem("dev_metrics_developers", JSON.stringify(developers));
 }
-
 export function loadDevelopers(): Developer[] {
-  const data = localStorage.getItem("dev_metrics_developers");
-  return data ? JSON.parse(data) : [];
+  try {
+    if (typeof window === "undefined") return [];
+    const data = localStorage.getItem("dev_metrics_developers");
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    // Normalizar dados para garantir shape correto
+    return parsed.map((d: any) => ({
+      ...d,
+      monthlyCosts: Array.isArray(d.monthlyCosts) ? d.monthlyCosts : [],
+      products: Array.isArray(d.products) ? d.products : [],
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export function saveProducts(products: Product[]): void {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -11,13 +11,17 @@ import {
 import { Developer } from "@/lib/integratedMetrics";
 
 export default function DeveloperEditPanel() {
-  const [developers, setDevelopers] = useState<Developer[]>(loadDevelopers());
+  const [developers, setDevelopers] = useState<Developer[]>([]);
   const [selectedDevId, setSelectedDevId] = useState<string>("");
   const [selectedMonth, setSelectedMonth] = useState<string>(
     new Date().toISOString().slice(0, 7)
   );
   const [onCallHours, setOnCallHours] = useState("");
   const [overtimeHours, setOvertimeHours] = useState("");
+
+  useEffect(() => {
+    setDevelopers(loadDevelopers());
+  }, []);
 
   const selectedDev = developers.find((d) => d.id === selectedDevId);
 
