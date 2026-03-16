@@ -161,6 +161,12 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
     onDataAdded?.();
   };
 
+  // Normalizar dados de desenvolvedor para evitar erros de tipo
+  const normalizedDevelopers = developers.map((dev) => ({
+    ...dev,
+    baseSalary: typeof dev.baseSalary === "string" ? parseFloat(dev.baseSalary) : dev.baseSalary,
+  }));
+
   return (
     <div className="space-y-4">
       {/* Tabs */}
@@ -251,21 +257,25 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           </div>
 
           {/* Lista de Desenvolvedores */}
-          {developers.length > 0 && (
+          {normalizedDevelopers.length > 0 && (
             <div className="border-t pt-4">
               <h3 className="font-semibold mb-3">Desenvolvedores Cadastrados</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {developers.map((dev) => (
-                  <div key={dev.id} className="p-3 bg-white rounded border border-gray-200">
-                    <p className="font-semibold text-gray-900">{dev.name}</p>
-                    <p className="text-sm text-gray-600">
-                      Salário Base: R$ {dev.baseSalary.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Custo com CLT (1.7x): R$ {(dev.baseSalary * 1.7).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                ))}
+                {normalizedDevelopers.map((dev) => {
+                  const baseSalary = Number(dev.baseSalary) || 0;
+                  const costWithCLT = baseSalary * 1.7;
+                  return (
+                    <div key={dev.id} className="p-3 bg-white rounded border border-gray-200">
+                      <p className="font-semibold text-gray-900">{dev.name}</p>
+                      <p className="text-sm text-gray-600">
+                        Salário Base: R$ {baseSalary.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Custo com CLT (1.7x): R$ {costWithCLT.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -304,7 +314,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
             <option value="">Selecione o desenvolvedor</option>
-            {developers.map((dev) => (
+            {normalizedDevelopers.map((dev) => (
               <option key={dev.id} value={dev.id}>
                 {dev.name}
               </option>
@@ -368,7 +378,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
             <option value="">Selecione o desenvolvedor</option>
-            {developers.map((dev) => (
+            {normalizedDevelopers.map((dev) => (
               <option key={dev.id} value={dev.id}>
                 {dev.name}
               </option>
