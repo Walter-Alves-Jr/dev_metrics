@@ -41,12 +41,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
       toast.error("Preencha nome e salário base");
       return;
     }
-    addDeveloper(
-      devName,
-      parseFloat(devBaseSalary),
-      devOnCall ? parseFloat(devOnCall) : undefined,
-      devOvertimeHours ? parseFloat(devOvertimeHours) : undefined
-    );
+    addDeveloper(devName, parseFloat(devBaseSalary));
     toast.success("Desenvolvedor adicionado!");
     setDevName("");
     setDevBaseSalary("");
