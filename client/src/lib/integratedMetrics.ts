@@ -266,11 +266,18 @@ export function addDeveloper(name: string, baseSalary: number): Developer {
 }
 
 export function updateDeveloper(devId: string, baseSalary?: number): void {
+  console.log(`updateDeveloper called: devId=${devId}, baseSalary=${baseSalary}`);
   const developers = loadDevelopers();
+  console.log(`Loaded ${developers.length} developers`);
   const dev = developers.find((d) => d.id === devId);
-  if (dev && baseSalary !== undefined) {
-    dev.baseSalary = baseSalary;
+  console.log(`Found dev: ${dev ? dev.name : 'NOT FOUND'}`);
+  if (dev && baseSalary !== undefined && baseSalary > 0) {
+    console.log(`Updating ${dev.name} from ${dev.baseSalary} to ${baseSalary}`);
+    dev.baseSalary = Number(baseSalary);
     saveDevelopers(developers);
+    console.log(`Saved developers to localStorage`);
+  } else {
+    console.warn(`Could not update: dev=${!!dev}, baseSalary=${baseSalary}`);
   }
 }
 

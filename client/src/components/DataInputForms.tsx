@@ -71,25 +71,41 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
   const handleSaveEditDeveloper = () => {
     if (!editingDevId) return;
 
-    if (editBaseSalary && parseFloat(editBaseSalary) > 0) {
-      updateDeveloper(editingDevId, parseFloat(editBaseSalary));
-    }
+    try {
+      // Sempre atualizar salário base se foi alterado
+      const newSalary = parseFloat(editBaseSalary);
+      console.log(`Tentando atualizar dev ${editingDevId} com salário: ${newSalary}`);
+      if (!isNaN(newSalary) && newSalary > 0) {
+        updateDeveloper(editingDevId, newSalary);
+        console.log(`Dev ${editingDevId} atualizado com sucesso`);
+      } else {
+        console.warn(`Salário inválido: ${newSalary}`);
+      }
 
-    if (editOnCallHours || editOvertimeHours) {
-      updateMonthlyCost(
-        editingDevId,
-        editMonth,
-        parseFloat(editOnCallHours) || 0,
-        parseFloat(editOvertimeHours) || 0
-      );
-    }
+      // Atualizar custos mensais se houver valores
+      const onCallHours = parseFloat(editOnCallHours) || 0;
+      const overtimeHours = parseFloat(editOvertimeHours) || 0;
+      
+      if (onCallHours > 0 || overtimeHours > 0) {
+        updateMonthlyCost(
+          editingDevId,
+          editMonth,
+          onCallHours,
+          overtimeHours
+        );
+      }
 
-    toast.success("Desenvolvedor atualizado!");
-    setEditingDevId(null);
-    setEditBaseSalary("");
-    setEditOnCallHours("");
-    setEditOvertimeHours("");
-    onDataAdded?.();
+      toast.success("Desenvolvedor atualizado!");
+      setEditingDevId(null);
+      setEditBaseSalary("");
+      setEditOnCallHours("");
+      setEditOvertimeHours("");
+      // Forçar recarga de dados
+      onDataAdded?.();
+    } catch (error) {
+      toast.error("Erro ao atualizar desenvolvedor");
+      console.error(error);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -210,10 +226,14 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
   };
 
   // Normalizar dados de desenvolvedor para evitar erros de tipo
-  const normalizedDevelopers = developers.map((dev) => ({
-    ...dev,
-    baseSalary: typeof dev.baseSalary === "string" ? parseFloat(dev.baseSalary) : dev.baseSalary,
-  }));
+  const normalizedDevelopers = developers.map((dev) => {
+    const baseSalary = typeof dev.baseSalary === "string" ? parseFloat(dev.baseSalary) : dev.baseSalary;
+    console.log(`Dev ${dev.name}: baseSalary = ${baseSalary}`);
+    return {
+      ...dev,
+      baseSalary,
+    };
+  });
 
   return (
     <div className="space-y-4">
