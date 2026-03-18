@@ -21,7 +21,7 @@ type DataInputFormsProps = {
 
 export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
   const [activeTab, setActiveTab] = useState<
-    "developer" | "product" | "project" | "bug" | "deployment" | "incident"
+    "developer" | "product" | "project" | "techdebt" | "deployment" | "bug"
   >("developer");
 
   // Developer Form
@@ -243,9 +243,9 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           { id: "developer", label: "Desenvolvedor" },
           { id: "product", label: "Produto" },
           { id: "project", label: "Projeto" },
-          { id: "bug", label: "Bug" },
+          { id: "techdebt", label: "Débito Técnico" },
           { id: "deployment", label: "Deploy" },
-          { id: "incident", label: "Incidente" },
+          { id: "bug", label: "Bug" },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -255,9 +255,9 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
                   | "developer"
                   | "product"
                   | "project"
-                  | "bug"
+                  | "techdebt"
                   | "deployment"
-                  | "incident"
+                  | "bug"
               )
             }
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
@@ -519,12 +519,12 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
         </div>
       )}
 
-      {/* Bug Form */}
-      {activeTab === "bug" && (
+      {/* Débito Técnico Form */}
+      {activeTab === "techdebt" && (
         <div className="space-y-3 p-4 bg-gray-50 rounded">
           <input
             type="text"
-            placeholder="Descrição do bug"
+            placeholder="Descrição do débito técnico"
             value={bugTitle}
             onChange={(e) => setBugTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded"
@@ -577,7 +577,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             <option value="low">Baixo</option>
           </select>
           <Button onClick={handleAddBug} className="w-full">
-            Registrar Bug
+            Registrar Débito Técnico
           </Button>
         </div>
       )}
@@ -619,12 +619,12 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
         </div>
       )}
 
-      {/* Incident Form */}
-      {activeTab === "incident" && (
+      {/* Bug Form */}
+      {activeTab === "bug" && (
         <div className="space-y-3 p-4 bg-gray-50 rounded">
           <input
             type="text"
-            placeholder="Título do incidente"
+            placeholder="Título do bug"
             value={incidentTitle}
             onChange={(e) => setIncidentTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded"
@@ -649,7 +649,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded"
           />
           <Button onClick={handleAddIncident} className="w-full">
-            Registrar Incidente
+            Registrar Bug
           </Button>
         </div>
       )}

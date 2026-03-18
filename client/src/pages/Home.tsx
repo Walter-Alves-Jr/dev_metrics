@@ -9,8 +9,8 @@ import QualityDashboard from "@/components/QualityDashboard";
 import ROIDashboard from "@/components/ROIDashboard";
 import ProjectsTimelineView from "@/components/ProjectsTimelineView";
 import ProjectsManager from "@/components/ProjectsManager";
+import TechDebtManager from "@/components/TechDebtManager";
 import BugsManager from "@/components/BugsManager";
-import IncidentsManager from "@/components/IncidentsManager";
 import {
   loadProjects,
   loadBugs,
@@ -109,13 +109,13 @@ export default function Home() {
 
         <Tabs defaultValue="entrada" className="w-full">
           <TabsList
-            className="grid w-full grid-cols-10 mb-4 overflow-x-auto"
+            className="grid w-full grid-cols-11 mb-4 overflow-x-auto"
             style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}
           >
             <TabsTrigger value="entrada">Entrada</TabsTrigger>
             <TabsTrigger value="projetos">Gestão Projetos</TabsTrigger>
+            <TabsTrigger value="techdebt">Gestão Débito Técnico</TabsTrigger>
             <TabsTrigger value="bugs">Gestão Bugs</TabsTrigger>
-            <TabsTrigger value="incidentes">Gestão Incidentes</TabsTrigger>
             <TabsTrigger value="executivo">Executivo</TabsTrigger>
             <TabsTrigger value="fluxo">Fluxo</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
@@ -144,6 +144,16 @@ export default function Home() {
             </div>
           </TabsContent>
 
+          {/* Gestão de Débito Técnico */}
+          <TabsContent value="techdebt" className="space-y-4">
+            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>
+                Gerenciar Débito Técnico
+              </h2>
+              <TechDebtManager onDataChanged={handleDataAdded} key={`techdebt-${refreshKey}`} />
+            </div>
+          </TabsContent>
+
           {/* Gestão de Bugs */}
           <TabsContent value="bugs" className="space-y-4">
             <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
@@ -151,16 +161,6 @@ export default function Home() {
                 Gerenciar Bugs
               </h2>
               <BugsManager onDataChanged={handleDataAdded} key={`bugs-${refreshKey}`} />
-            </div>
-          </TabsContent>
-
-          {/* Gestão de Incidentes */}
-          <TabsContent value="incidentes" className="space-y-4">
-            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
-              <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>
-                Gerenciar Incidentes
-              </h2>
-              <IncidentsManager onDataChanged={handleDataAdded} key={`incidents-${refreshKey}`} />
             </div>
           </TabsContent>
 
