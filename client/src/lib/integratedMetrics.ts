@@ -254,19 +254,23 @@ export function loadIncidents(): Incident[] {
 import { addDeveloper as addStorageDeveloper, updateDeveloper as updateStorageDeveloper } from "./storage";
 
 export function addDeveloper(name: string, baseSalary: number): Developer {
+  // Primeiro, adicionamos no storage.ts que gera o ID padrão
+  const storageDev = addStorageDeveloper(name, baseSalary);
+  
   const developers = loadDevelopers();
   const newDev: Developer = {
-    id: Date.now().toString(),
+    id: storageDev.id, // Usar o mesmo ID do storage para manter consistência
     name,
     baseSalary,
     monthlyCosts: [],
     products: [],
   };
-  developers.push(newDev);
-  saveDevelopers(developers);
   
-  // Sincronizar com o storage.ts
-  addStorageDeveloper(name, baseSalary);
+  // Evitar duplicação se já existir (segurança extra)
+  if (!developers.find(d => d.id === newDev.id)) {
+    developers.push(newDev);
+    saveDevelopers(developers);
+  }
   
   return newDev;
 }

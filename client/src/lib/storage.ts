@@ -118,6 +118,11 @@ export function addDeveloper(
   productIds: string[] = []
 ): Developer {
   const developers = getDevelopers();
+  
+  // Evitar duplicação por nome se já existir recentemente
+  const existing = developers.find(d => d.name === name);
+  if (existing) return existing;
+
   const newDeveloper: Developer = {
     id: Date.now().toString(),
     name,

@@ -7,6 +7,7 @@ import FlowDashboard from "@/components/FlowDashboard";
 import SustentationDashboard from "@/components/SustentationDashboard";
 import QualityDashboard from "@/components/QualityDashboard";
 import ROIDashboard from "@/components/ROIDashboard";
+import ProjectsTimelineView from "@/components/ProjectsTimelineView";
 import {
   loadProjects,
   loadBugs,
@@ -105,12 +106,13 @@ export default function Home() {
 
         <Tabs defaultValue="entrada" className="w-full">
           <TabsList
-            className="grid w-full grid-cols-6 mb-4 overflow-x-auto"
+            className="grid w-full grid-cols-7 mb-4 overflow-x-auto"
             style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}
           >
             <TabsTrigger value="entrada">Entrada</TabsTrigger>
             <TabsTrigger value="executivo">Executivo</TabsTrigger>
             <TabsTrigger value="fluxo">Fluxo</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="sustentacao">Sustentação</TabsTrigger>
             <TabsTrigger value="qualidade">Qualidade</TabsTrigger>
             <TabsTrigger value="roi">ROI</TabsTrigger>
@@ -142,6 +144,13 @@ export default function Home() {
           <TabsContent value="fluxo" className="space-y-4">
             <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
               <FlowDashboard tasks={tasks} />
+            </div>
+          </TabsContent>
+
+          {/* Timeline de Projetos */}
+          <TabsContent value="timeline" className="space-y-4">
+            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
+              <ProjectsTimelineView tasks={tasks} />
             </div>
           </TabsContent>
 
