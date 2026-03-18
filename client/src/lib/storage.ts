@@ -137,8 +137,16 @@ export function updateDeveloper(
   productIds?: string[]
 ): Developer | null {
   const developers = getDevelopers();
-  const index = developers.findIndex((d) => d.id === id);
+  // Tentar encontrar por ID primeiro
+  let index = developers.findIndex((d) => d.id === id);
+  
+  // Se não encontrar por ID (pode acontecer se os IDs estiverem dessincronizados entre as storages), tentar por nome
+  if (index === -1) {
+    index = developers.findIndex((d) => d.name === name);
+  }
+
   if (index === -1) return null;
+  
   developers[index] = {
     ...developers[index],
     name,

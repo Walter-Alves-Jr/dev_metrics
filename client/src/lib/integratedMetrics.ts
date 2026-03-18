@@ -251,6 +251,8 @@ export function loadIncidents(): Incident[] {
 
 // Helper functions
 
+import { addDeveloper as addStorageDeveloper, updateDeveloper as updateStorageDeveloper } from "./storage";
+
 export function addDeveloper(name: string, baseSalary: number): Developer {
   const developers = loadDevelopers();
   const newDev: Developer = {
@@ -262,22 +264,23 @@ export function addDeveloper(name: string, baseSalary: number): Developer {
   };
   developers.push(newDev);
   saveDevelopers(developers);
+  
+  // Sincronizar com o storage.ts
+  addStorageDeveloper(name, baseSalary);
+  
   return newDev;
 }
 
 export function updateDeveloper(devId: string, baseSalary?: number): void {
-  console.log(`updateDeveloper called: devId=${devId}, baseSalary=${baseSalary}`);
   const developers = loadDevelopers();
-  console.log(`Loaded ${developers.length} developers`);
   const dev = developers.find((d) => d.id === devId);
-  console.log(`Found dev: ${dev ? dev.name : 'NOT FOUND'}`);
+  
   if (dev && baseSalary !== undefined && baseSalary > 0) {
-    console.log(`Updating ${dev.name} from ${dev.baseSalary} to ${baseSalary}`);
     dev.baseSalary = Number(baseSalary);
     saveDevelopers(developers);
-    console.log(`Saved developers to localStorage`);
-  } else {
-    console.warn(`Could not update: dev=${!!dev}, baseSalary=${baseSalary}`);
+    
+    // Sincronizar com o storage.ts para refletir nos outros dashboards
+    updateStorageDeveloper(devId, dev.name, baseSalary);
   }
 }
 

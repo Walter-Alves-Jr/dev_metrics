@@ -74,12 +74,8 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
     try {
       // Sempre atualizar salário base se foi alterado
       const newSalary = parseFloat(editBaseSalary);
-      console.log(`Tentando atualizar dev ${editingDevId} com salário: ${newSalary}`);
       if (!isNaN(newSalary) && newSalary > 0) {
         updateDeveloper(editingDevId, newSalary);
-        console.log(`Dev ${editingDevId} atualizado com sucesso`);
-      } else {
-        console.warn(`Salário inválido: ${newSalary}`);
       }
 
       // Atualizar custos mensais se houver valores
@@ -103,12 +99,10 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
       setEditOnCallHours("");
       setEditOvertimeHours("");
       
-      // Forçar recarga de dados - IMPORTANTE: isso vai recarregar a lista
-      console.log("Chamando onDataAdded para recarregar dados");
+      // Forçar recarga de dados
       onDataAdded?.();
     } catch (error) {
       toast.error("Erro ao atualizar desenvolvedor");
-      console.error(error);
     }
   };
 
@@ -239,11 +233,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
     };
   });
   
-  // Debug: verificar se developers foi carregado corretamente
-  console.log(`DataInputForms renderizado com ${normalizedDevelopers.length} devs`);
-  normalizedDevelopers.forEach(dev => {
-    console.log(`  - ${dev.name}: R$ ${dev.baseSalary}`);
-  });
+
 
   return (
     <div className="space-y-4">
