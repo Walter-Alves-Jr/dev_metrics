@@ -474,3 +474,21 @@ export function resolveIncident(incidentId: string, recurring?: boolean): void {
     saveIncidents(incidents);
   }
 }
+
+export function deleteProject(projectId: string): void {
+  const projects = loadProjects();
+  const filtered = projects.filter((p) => p.id !== projectId);
+  saveProjects(filtered);
+}
+
+export function deleteBug(bugId: string): void {
+  const bugs = loadBugs();
+  const filtered = bugs.filter((b) => b.id !== bugId);
+  saveBugs(filtered);
+}
+
+export function deleteDeveloperIntegrated(devId: string): void {
+  const developers = loadDevelopers();
+  const filtered = developers.filter((d) => d.id !== devId);
+  saveDevelopers(filtered);
+}

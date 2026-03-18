@@ -8,6 +8,8 @@ import SustentationDashboard from "@/components/SustentationDashboard";
 import QualityDashboard from "@/components/QualityDashboard";
 import ROIDashboard from "@/components/ROIDashboard";
 import ProjectsTimelineView from "@/components/ProjectsTimelineView";
+import ProjectsManager from "@/components/ProjectsManager";
+import BugsManager from "@/components/BugsManager";
 import {
   loadProjects,
   loadBugs,
@@ -106,10 +108,12 @@ export default function Home() {
 
         <Tabs defaultValue="entrada" className="w-full">
           <TabsList
-            className="grid w-full grid-cols-7 mb-4 overflow-x-auto"
+            className="grid w-full grid-cols-9 mb-4 overflow-x-auto"
             style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}
           >
             <TabsTrigger value="entrada">Entrada</TabsTrigger>
+            <TabsTrigger value="projetos">Gestão Projetos</TabsTrigger>
+            <TabsTrigger value="bugs">Gestão Bugs</TabsTrigger>
             <TabsTrigger value="executivo">Executivo</TabsTrigger>
             <TabsTrigger value="fluxo">Fluxo</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
@@ -125,6 +129,26 @@ export default function Home() {
                 Registrar Dados
               </h2>
               <DataInputForms onDataAdded={handleDataAdded} key={refreshKey} />
+            </div>
+          </TabsContent>
+
+          {/* Gestão de Projetos */}
+          <TabsContent value="projetos" className="space-y-4">
+            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>
+                Gerenciar Projetos
+              </h2>
+              <ProjectsManager onDataChanged={handleDataAdded} key={`projects-${refreshKey}`} />
+            </div>
+          </TabsContent>
+
+          {/* Gestão de Bugs */}
+          <TabsContent value="bugs" className="space-y-4">
+            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: "#111827" }}>
+                Gerenciar Bugs
+              </h2>
+              <BugsManager onDataChanged={handleDataAdded} key={`bugs-${refreshKey}`} />
             </div>
           </TabsContent>
 
