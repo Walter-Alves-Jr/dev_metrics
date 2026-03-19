@@ -1,10 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration - will be set via environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Inicializa o Supabase com valores de fallback para evitar erros
+let supabase: any = null;
+
+try {
+  if (supabaseUrl && supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey && supabaseAnonKey !== 'placeholder-key') {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  }
+} catch (error) {
+  console.warn('Supabase não configurado:', error);
+}
+
+export { supabase };
 
 // Types for webhook integrations
 export interface WebhookIntegration {
@@ -36,7 +47,8 @@ export interface IntegrationLog {
 // Helper function to generate webhook URL
 export const generateWebhookUrl = (integrationId: string): string => {
   const baseUrl = window.location.origin;
-  return `${baseUrl}/api/webhooks/${integrationId}`;
+  const basePath = '/smartops';
+  return `${baseUrl}${basePath}/api/webhooks/${integrationId}`;
 };
 
 // Helper function to map external JSON to SmartOps format
