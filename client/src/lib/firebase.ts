@@ -2,14 +2,13 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 
 // Firebase configuration
-// NOTE: Replace these values with your own Firebase project credentials
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDemoKeyForDevelopment",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "smartops-demo.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "smartops-demo",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "smartops-demo.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456",
+  apiKey: "AIzaSyDUvguu6D6hD9-T75ndr7jnG75dcAS_JEc",
+  authDomain: "smartops-3e1a9.firebaseapp.com",
+  projectId: "smartops-3e1a9",
+  storageBucket: "smartops-3e1a9.firebasestorage.app",
+  messagingSenderId: "659877434439",
+  appId: "1:659877434439:web:29c9ab62d49698838e74d62",
 };
 
 // Initialize Firebase

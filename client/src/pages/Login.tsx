@@ -95,11 +95,7 @@ export default function Login() {
           </button>
         </div>
 
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-xs text-blue-700">
-            <strong>Nota:</strong> Para usar o Firebase, você precisa adicionar suas credenciais no arquivo <code>.env</code> do projeto com as variáveis <code>VITE_FIREBASE_*</code>.
-          </p>
-        </div>
+
       </div>
     </div>
   );
