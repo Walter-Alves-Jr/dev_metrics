@@ -1,15 +1,32 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
+// Get the base path for GitHub Pages
+const getBasePath = () => {
+  const href = window.location.href;
+  if (href.includes('github.io/dev_metrics')) {
+    return '/dev_metrics';
+  }
+  return '';
+};
+
+const BASE_PATH = getBasePath();
 
 function Router() {
+  const [location] = useLocation();
+  
+  // Normalize the location by removing the base path if present
+  const normalizedPath = location.startsWith(BASE_PATH) 
+    ? location.slice(BASE_PATH.length) || '/'
+    : location;
+
   return (
-    <Switch>
+    <Switch location={normalizedPath}>
       <Route path={"/"} component={Home} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
