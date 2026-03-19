@@ -11,6 +11,8 @@ import ProjectsTimelineView from "@/components/ProjectsTimelineView";
 import ProjectsManager from "@/components/ProjectsManager";
 import TechDebtManager from "@/components/TechDebtManager";
 import BugsManager from "@/components/BugsManager";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "wouter";
 import {
   loadProjects,
   loadBugs,
@@ -25,6 +27,8 @@ import {
 } from "@/lib/doraMetrics";
 
 export default function Home() {
+  const { user, logout } = useAuth();
+  const [, setLocation] = useLocation();
   const [refreshKey, setRefreshKey] = useState(0);
   const [deployments, setDeployments] = useState<DeploymentRecord[]>([]);
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
@@ -95,16 +99,32 @@ export default function Home() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleLogout = async () => {
+    await logout();
+    setLocation('/login');
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F5F7FA" }}>
       <div className="max-w-7xl mx-auto p-4">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: "#111827" }}>
-            Engineering Performance Dashboard
-          </h1>
-          <p style={{ color: "#6B7280" }}>
-            Métricas DORA + Sustentação para gestão de engenharia
-          </p>
+        <header className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold mb-2" style={{ color: "#111827" }}>
+              SmartOps - Gestão de Tempo e Custos
+            </h1>
+            <p style={{ color: "#6B7280" }}>
+              Dashboard inteligente para otimizar recursos, projetos e operações
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-600 mb-2">Olá, {user?.email}</p>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium transition-colors"
+            >
+              Sair
+            </button>
+          </div>
         </header>
 
         <Tabs defaultValue="entrada" className="w-full">

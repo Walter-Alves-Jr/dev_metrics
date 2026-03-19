@@ -52,7 +52,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
       return;
     }
     addDeveloper(devName, parseFloat(devBaseSalary));
-    toast.success("Desenvolvedor adicionado!");
+    toast.success("Recurso adicionado!");
     setDevName("");
     setDevBaseSalary("");
     setDevOnCall("");
@@ -91,7 +91,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
         );
       }
 
-      toast.success("Desenvolvedor atualizado!");
+      toast.success("Recurso atualizado!");
       
       // Limpar estado de edição
       setEditingDevId(null);
@@ -240,7 +240,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-200 overflow-x-auto">
         {[
-          { id: "developer", label: "Desenvolvedor" },
+          { id: "developer", label: "Recurso" },
           { id: "product", label: "Produto" },
           { id: "project", label: "Projeto" },
           { id: "techdebt", label: "Débito Técnico" },
@@ -275,11 +275,11 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
       {activeTab === "developer" && (
         <div className="space-y-4 p-4 bg-gray-50 rounded">
           <div>
-            <h3 className="font-semibold mb-3">Cadastrar Novo Desenvolvedor</h3>
+            <h3 className="font-semibold mb-3">Cadastrar Novo Recurso</h3>
             <div className="space-y-3">
               <input
                 type="text"
-                placeholder="Nome do desenvolvedor"
+                placeholder="Nome do recurso"
                 value={devName}
                 onChange={(e) => setDevName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded"
@@ -327,7 +327,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
           {/* Lista de Desenvolvedores */}
           {normalizedDevelopers.length > 0 && (
             <div className="border-t pt-4">
-              <h3 className="font-semibold mb-3">Desenvolvedores Cadastrados</h3>
+              <h3 className="font-semibold mb-3">Recursos Cadastrados</h3>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {normalizedDevelopers.map((dev) => {
                   const baseSalary = Number(dev.baseSalary) || 0;
@@ -470,7 +470,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             onChange={(e) => setProjectDevId(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
-            <option value="">Selecione o desenvolvedor</option>
+            <option value="">Selecione o recurso</option>
             {normalizedDevelopers.map((dev) => (
               <option key={dev.id} value={dev.id}>
                 {dev.name}
@@ -534,7 +534,7 @@ export default function DataInputForms({ onDataAdded }: DataInputFormsProps) {
             onChange={(e) => setBugDevId(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded"
           >
-            <option value="">Selecione o desenvolvedor</option>
+            <option value="">Selecione o recurso</option>
             {normalizedDevelopers.map((dev) => (
               <option key={dev.id} value={dev.id}>
                 {dev.name}
