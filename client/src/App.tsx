@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 const getBasePath = () => {
   if (typeof window !== 'undefined') {
     const href = window.location.href;
-    if (href.includes('github.io/smartops')) {
+    if (href.includes('walter-alves-jr.github.io/smartops')) {
       return '/smartops';
     }
   }

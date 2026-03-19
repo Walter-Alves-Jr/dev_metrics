@@ -153,7 +153,7 @@ function vitePluginManusDebugCollector(): Plugin {
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
-  base: process.env.GITHUB_PAGES ? "/dev_metrics/" : "/",
+  base: process.env.GITHUB_PAGES ? "/smartops/" : "/",
   plugins,
   resolve: {
     alias: {
