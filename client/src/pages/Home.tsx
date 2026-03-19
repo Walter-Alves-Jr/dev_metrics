@@ -11,6 +11,7 @@ import ProjectsTimelineView from "@/components/ProjectsTimelineView";
 import ProjectsManager from "@/components/ProjectsManager";
 import TechDebtManager from "@/components/TechDebtManager";
 import BugsManager from "@/components/BugsManager";
+import IntegrationsManager from "@/components/IntegrationsManager";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import {
@@ -142,6 +143,7 @@ export default function Home() {
             <TabsTrigger value="sustentacao">Sustentação</TabsTrigger>
             <TabsTrigger value="qualidade">Qualidade</TabsTrigger>
             <TabsTrigger value="roi">ROI</TabsTrigger>
+            <TabsTrigger value="integracoes">Integrações</TabsTrigger>
           </TabsList>
 
           {/* Entrada de Dados */}
@@ -228,6 +230,13 @@ export default function Home() {
           <TabsContent value="roi" className="space-y-4">
             <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
               <ROIDashboard />
+            </div>
+          </TabsContent>
+
+          {/* Gerenciador de Integrações */}
+          <TabsContent value="integracoes" className="space-y-4">
+            <div className="bg-white p-6 rounded border" style={{ borderColor: "#E5E7EB" }}>
+              <IntegrationsManager />
             </div>
           </TabsContent>
         </Tabs>
