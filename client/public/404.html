@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting...</title>
+  <script>
+    // This script handles 404 errors on GitHub Pages by redirecting to the SPA
+    // GitHub Pages will serve this file for any path that doesn't exist
+    const path = window.location.pathname;
+    const segments = path.split('/').filter(Boolean);
+    
+    // Remove 'dev_metrics' from segments if it's the first element
+    if (segments[0] === 'dev_metrics') {
+      segments.shift();
+    }
+    
+    // Redirect to the app with the original path as a query parameter
+    const redirectPath = segments.length > 0 ? '/' + segments.join('/') : '/';
+    window.location.replace('/dev_metrics/#' + redirectPath);
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html>

@@ -1,37 +1,35 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch, useLocation } from "wouter";
+import { Route, Switch, Router } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
-// Get the base path for GitHub Pages
+// Detect if running on GitHub Pages and set the base path accordingly
 const getBasePath = () => {
-  const href = window.location.href;
-  if (href.includes('github.io/dev_metrics')) {
-    return '/dev_metrics';
+  if (typeof window !== 'undefined') {
+    const href = window.location.href;
+    if (href.includes('github.io/dev_metrics')) {
+      return '/dev_metrics';
+    }
   }
   return '';
 };
 
 const BASE_PATH = getBasePath();
 
-function Router() {
-  const [location] = useLocation();
-  
-  // Normalize the location by removing the base path if present
-  const normalizedPath = location.startsWith(BASE_PATH) 
-    ? location.slice(BASE_PATH.length) || '/'
-    : location;
-
+// Custom hook to use the router with base path
+function AppRouter() {
   return (
-    <Switch location={normalizedPath}>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <Router base={BASE_PATH}>
+      <Switch>
+        <Route path={"/"} component={Home} />
+        <Route path={"/404"} component={NotFound} />
+        {/* Final fallback route */}
+        <Route component={NotFound} />
+      </Switch>
+    </Router>
   );
 }
 
@@ -49,7 +47,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AppRouter />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
