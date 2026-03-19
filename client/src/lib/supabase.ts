@@ -1,21 +1,27 @@
-import { createClient } from '@supabase/supabase-js';
+// Supabase é carregado sob demanda para não bloquear a inicialização do app
+let supabaseClient: any = null;
+let supabaseLoaded = false;
 
-// Supabase configuration - will be set via environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
-
-// Inicializa o Supabase com valores de fallback para evitar erros
-let supabase: any = null;
-
-try {
-  if (supabaseUrl && supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey && supabaseAnonKey !== 'placeholder-key') {
-    supabase = createClient(supabaseUrl, supabaseAnonKey);
+export async function initSupabase() {
+  if (supabaseLoaded) return supabaseClient;
+  
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (supabaseUrl && supabaseAnonKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+      supabaseLoaded = true;
+    }
+  } catch (error) {
+    console.warn('Supabase não disponível:', error);
   }
-} catch (error) {
-  console.warn('Supabase não configurado:', error);
+  
+  return supabaseClient;
 }
 
-export { supabase };
+export const getSupabase = () => supabaseClient;
 
 // Types for webhook integrations
 export interface WebhookIntegration {
@@ -23,7 +29,7 @@ export interface WebhookIntegration {
   name: string;
   source: 'jira' | 'azure_devops' | 'movidesk' | 'multidados' | 'custom';
   webhook_url: string;
-  field_mappings: Record<string, string>; // Maps source field to SmartOps field
+  field_mappings: Record<string, string>;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -77,9 +83,9 @@ const getNestedValue = (obj: Record<string, any>, path: string): any => {
 export const defaultMappings = {
   jira: {
     'project.id': 'issue.key',
-    'project.name': 'issue.fields.project.name',
+    'project.name': 'issue.fields.summary',
     'project.status': 'issue.fields.status.name',
-    'project.hours': 'issue.fields.customfield_10000', // Adjust based on your Jira setup
+    'project.hours': 'issue.fields.customfield_10000',
     'project.cost': 'issue.fields.customfield_10001',
   },
   azure_devops: {
