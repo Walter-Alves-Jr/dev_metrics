@@ -109,8 +109,8 @@ export default function Home() {
 
         <Tabs defaultValue="entrada" className="w-full">
           <TabsList
-            className="grid w-full grid-cols-11 mb-4 overflow-x-auto"
-            style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB" }}
+            className="flex w-full mb-4 overflow-x-auto gap-1 pb-2"
+            style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", borderBottom: "none" }}
           >
             <TabsTrigger value="entrada">Entrada</TabsTrigger>
             <TabsTrigger value="projetos">Gestão Projetos</TabsTrigger>
